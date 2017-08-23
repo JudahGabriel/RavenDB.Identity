@@ -1,5 +1,5 @@
 ﻿# ![RavenDB logo](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/RavenDB.Identity/nuget-icon.png?raw=true) RavenDB.Identity #
-RavenDB identity provider for ASP.NET Core. T
+RavenDB identity provider for ASP.NET Core.
 The simple and easy Identity provider for RavenDB and ASP.NET Core. Use Raven to store your users and logins.
 
 ## Instructions ##
@@ -12,7 +12,7 @@ public void ConfigureServices(IServiceCollection services)
 	services
 		.AddRavenDb(Configuration.GetConnectionString("RavenDbConnection")) // Create a RavenDB DocumentStore singleton.
 		.AddRavenDbAsyncSession() // Create a RavenDB IAsyncDocumentSession for each request.
-		.AddRavenDbIdentity<AppUser>(); // Use Raven for users and roles. AppUser is a simple DTO to hold our user data. See https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample.Web.NetCore/Models/AppUser.cs
+		.AddRavenDbIdentity<AppUser>(); // Use Raven for users and roles. AppUser is your class, a simple DTO to hold user data. See https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample.Web.NetCore/Models/AppUser.cs
 
 	...
 }
@@ -22,4 +22,4 @@ public void ConfigureServices(IServiceCollection services)
 
 3. You're done! 
 
-Need help? See the [sample app](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Sample.Web.NetCore)
+Need help? See the [sample app](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Sample.Web.NetCore).
