@@ -3,7 +3,7 @@ RavenDB identity provider for ASP.NET Core.
 
 The simple and easy Identity provider for RavenDB and ASP.NET Core. Use Raven to store your users and logins.
 
-(This is an Identity Provider for .NET Core. If you're looking for an Identity Provider for MVC6+ and the full .NET framework, see our [sister project](.)
+(This is an Identity Provider for .NET Core. If you're looking for an Identity Provider for MVC6+ and the full .NET framework, see our [sister project](https://github.com/JudahGabriel/RavenDB.AspNet.Identity).
 
 ## Instructions ##
 1. In Startup.cs:
