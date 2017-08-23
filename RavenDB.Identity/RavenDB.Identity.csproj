@@ -4,6 +4,10 @@
     <TargetFramework>netstandard1.6</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <NuspecFile>RavenDB.Identity.nuspec</NuspecFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="Readme.md" />
   </ItemGroup>

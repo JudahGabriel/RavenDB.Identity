@@ -14,9 +14,12 @@
     <tags>ravendb identity raven nosql aspnet aspnetcore</tags>
     <iconUrl>https://github.com/JudahGabriel/RavenDB.Identity/blob/master/RavenDB.Identity/nuget-icon.png?raw=true</iconUrl>
 		<dependencies>
+      <dependency id="Microsoft.AspNetCore.Identity" version="1.1.2"></dependency>
+      <dependency id="Microsoft.Extensions.DependencyInjection" version="1.1.1"></dependency>
+      <dependency id="RavenDB.Client" version="3.5.4"></dependency>
 		</dependencies>
   </metadata>
 	<files>
-		<file src="ReadMe.md" />
+		<file src="../ReadMe.md" />
 	</files>
 </package>
