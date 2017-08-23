@@ -25,4 +25,4 @@ public void ConfigureServices(IServiceCollection services)
 
 Need help? See the [sample app](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Sample).
 
-Not using .NET Core? See our [sister project](https://github.com/JudahGabriel/RavenDB.AspNet.Identity for a RavenDB Identity Provider for MVC 5+ and WebAPI 2+ on the full .NET Framework.
+Not using .NET Core? See our [sister project](https://github.com/JudahGabriel/RavenDB.AspNet.Identity) for a RavenDB Identity Provider for MVC 5+ and WebAPI 2+ on the full .NET Framework.
