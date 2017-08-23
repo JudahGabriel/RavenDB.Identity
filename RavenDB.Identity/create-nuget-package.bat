@@ -1,1 +1,1 @@
-dotnet pack RavenDB.Identity.csproj
+dotnet pack RavenDB.Identity.csproj --configuration  Release

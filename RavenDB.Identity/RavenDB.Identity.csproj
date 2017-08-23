@@ -1,16 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <Description>The simple and easy RavenDB Identity provider for ASP.NET Core. Use Raven to store your users and logins. As simple as services.AddRavenDbIdentity&lt;AppUser&gt;();</Description>
+    <Authors>Judah Gabriel Himango</Authors>
+    <TargetFrameworks>netstandard1.6</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>RavenDb.Identity</AssemblyName>
+    <Title>RavenDB Identity for ASP.NET Core</Title>
+    <PackageId>RavenDb.Identity</PackageId>
+    <PackageTags>ravendb;identity;aspnetcore;membership;authentication;nosql;authorization</PackageTags>
+    <PackageProjectUrl>https://github.com/JudahGabriel/RavenDB.Identity</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/JudahGabriel/RavenDB.Identity</RepositoryUrl>
+    <PackageLicenseUrl>https://github.com/JudahGabriel/RavenDB.Identity/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageIconUrl>https://github.com/JudahGabriel/RavenDB.Identity/blob/master/RavenDB.Identity/nuget-icon.png?raw=true</PackageIconUrl>
+    <copyright>Copyright 2017 BitShuva</copyright>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <Version>1.0.3</Version>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
-
-  <PropertyGroup>
-    <NuspecFile>RavenDB.Identity.nuspec</NuspecFile>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Readme.md" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.1.2" />
