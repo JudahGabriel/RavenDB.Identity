@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DCA799
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{B730B0AD-FB9B-4768-BC78-B099DD77A876}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Web.NetCore", "Sample.Web.NetCore\Sample.Web.NetCore.csproj", "{BAF1679A-0D3F-4373-B3E4-7C1C78EFF3E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample", "Sample\Sample.csproj", "{BAF1679A-0D3F-4373-B3E4-7C1C78EFF3E2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RavenDB.Identity", "RavenDB.Identity\RavenDB.Identity.csproj", "{C7824FBF-9E9B-40B5-9CF5-4884F8378BA6}"
 EndProject
