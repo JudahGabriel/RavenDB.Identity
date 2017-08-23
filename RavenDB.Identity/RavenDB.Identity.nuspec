@@ -6,8 +6,8 @@
     <title>RavenDB Identity for ASP.NET Core</title>
     <authors>Judah Gabriel Himango</authors>
     <owners>judahgabriel</owners>
-    <licenseUrl>https://github.com/JudahGabriel/RavenDB.AspNet.Identity/blob/master/LICENSE.md</licenseUrl>
-    <projectUrl>https://github.com/JudahGabriel/RavenDB.AspNet.Identity</projectUrl>
+    <licenseUrl>https://github.com/JudahGabriel/RavenDB.Identity/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/JudahGabriel/RavenDB.Identity</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>The simple and easy RavenDB Identity provider for ASP.NET Core. Use Raven to store your users and logins. As simple as services.AddRavenDbIdentity&lt;AppUser&gt;();</description>
     <copyright>Copyright 2017 BitShuva</copyright>
