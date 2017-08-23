@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>RavenDB.Identity</id>
+    <version>0.0.9.0</version>
+    <title>RavenDB Identity Provider for ASP.Net Core</title>
+    <authors>Judah Gabriel Himango</authors>
+    <owners>judahgabriel</owners>
+    <licenseUrl>https://github.com/JudahGabriel/RavenDB.AspNet.Identity/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/JudahGabriel/RavenDB.AspNet.Identity</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The simple and easy RavenDB Identity provider for ASP.NET Core. Use Raven to store your users and logins. As simple as services.AddRavenDbIdentity&lt;AppUser&gt;();</description>
+    <copyright>Copyright 2017 BitShuva</copyright>
+    <tags>ravendb identity raven nosql aspnet aspnetcore</tags>
+    <iconUrl>https://github.com/JudahGabriel/RavenDB.AspNet.Identity/blob/master/RavenDB.AspNet.Identity/nuget-icon.png?raw=true</iconUrl>
+		<dependencies>
+		</dependencies>
+  </metadata>
+	<files>
+		<file src="ReadMe.md" />
+	</files>
+</package>
