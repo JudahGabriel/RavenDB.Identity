@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Raven.Client;
 using Raven.Client.Document;
 using System;
@@ -84,10 +85,13 @@ namespace RavenDB.Identity
         public static IServiceCollection AddRavenDbIdentity<TUser>(this IServiceCollection services)
             where TUser : IdentityUser
         {
-            services.AddIdentity<TUser, IdentityRole>(); // Adds the AspNet identity system to work with our RavenDB identity objects.
+            // Add the AspNet identity system to work with our RavenDB identity objects.
+            services.AddIdentity<TUser, IdentityRole>()
+                .AddDefaultTokenProviders(); // options => options.Tokens.ProviderMap.Add("Default", new TokenProviderDescriptor(typeof(UserStore<TUser>)))
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserStore<TUser>, UserStore<TUser>>();
             services.AddScoped<Microsoft.AspNetCore.Identity.IRoleStore<IdentityRole>, RoleStore<IdentityRole>>();
+
             return services;
         }
     }

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Sample.Web.NetCore.Controllers
+namespace Sample.Controllers
 {
     /// <summary>
     /// Controller that saves changes on the RavenDB document session.
@@ -18,7 +18,7 @@ namespace Sample.Web.NetCore.Controllers
             DbSession = dbSession ?? throw new ArgumentNullException(nameof(dbSession));
 
             // RavenDB best practice: during save, wait for the indexes to update.
-            // This way, Post-Redirect-Get scenarios are covered, not affected by stale indexes.
+            // This way, Post-Redirect-Get scenarios won't be affected by stale indexes.
             // For more info, see https://ravendb.net/docs/article-page/3.5/Csharp/client-api/session/saving-changes
             DbSession.Advanced.WaitForIndexesAfterSaveChanges(timeout: TimeSpan.FromSeconds(30), throwOnTimeout: false);
         }

@@ -13,10 +13,24 @@ using Microsoft.Extensions.Logging;
 
 namespace RavenDB.Identity
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TRole"></typeparam>
     public class RoleMan<TRole> : RoleManager<TRole>
         where TRole : class
     {
-        public RoleMan(IRoleStore<TRole> store, IEnumerable<IRoleValidator<TRole>> roleValidators, ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, ILogger<RoleManager<TRole>> logger, IHttpContextAccessor contextAccessor) : base(store, roleValidators, keyNormalizer, errors, logger, contextAccessor)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="store"></param>
+        /// <param name="roleValidators"></param>
+        /// <param name="keyNormalizer"></param>
+        /// <param name="errors"></param>
+        /// <param name="logger"></param>
+        /// <param name="contextAccessor"></param>
+        public RoleMan(IRoleStore<TRole> store, IEnumerable<IRoleValidator<TRole>> roleValidators, ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, ILogger<RoleManager<TRole>> logger, IHttpContextAccessor contextAccessor) : 
+            base(store, roleValidators, keyNormalizer, errors, logger)
         {
         }
     }

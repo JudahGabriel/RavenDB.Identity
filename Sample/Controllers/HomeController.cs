@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Sample.Models;
 using Raven.Client;
-using Sample.Web.NetCore.Models;
 
-namespace Sample.Web.NetCore.Controllers
+namespace Sample.Controllers
 {
     public class HomeController : RavenController
     {

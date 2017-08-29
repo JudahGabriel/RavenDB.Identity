@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Sample.Web.NetCore.Services
+namespace Sample.Services
 {
     public interface IEmailSender
     {
