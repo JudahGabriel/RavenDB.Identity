@@ -39,10 +39,10 @@ namespace RavenDB.Identity
                 throw new ArgumentNullException("Connection string cannot be null or empty.");
             }
 
-            var documentStore = new DocumentStore();
-            configureAction?.Invoke(documentStore);
-            
+            var documentStore = new DocumentStore();            
             documentStore.ParseConnectionString(connectionString);
+            documentStore.Conventions.RegisterIdConvention<IdentityUser>((dbname, commands, user) => "IdentityUsers/" + user.Id);
+            configureAction?.Invoke(documentStore);
             documentStore.Initialize();
 
             serviceCollection.AddSingleton<IDocumentStore>(documentStore);
@@ -81,33 +81,22 @@ namespace RavenDB.Identity
         /// </summary>
         /// <typeparam name="TUser">The type of user. This should be a class you created derived from <see cref="IdentityUser"/>.</typeparam>
         /// <param name="services"></param>
-        /// <returns>The same service collection so that multiple calls can be chained.</returns>
-        public static IServiceCollection AddRavenDbIdentity<TUser>(this IServiceCollection services)
-            where TUser : IdentityUser
-        {
-            // Add the AspNet identity system to work with our RavenDB identity objects.
-            services.AddIdentity<TUser, IdentityRole>()
-                .AddDefaultTokenProviders(); // options => options.Tokens.ProviderMap.Add("Default", new TokenProviderDescriptor(typeof(UserStore<TUser>)))
-
-            services.AddScoped<Microsoft.AspNetCore.Identity.IUserStore<TUser>, UserStore<TUser>>();
-            services.AddScoped<Microsoft.AspNetCore.Identity.IRoleStore<IdentityRole>, RoleStore<IdentityRole>>();
-
-            return services;
-        }
-
-        /// <summary>
-        /// Registers a RavenDB as the user store.
-        /// </summary>
-        /// <typeparam name="TUser">The type of user. This should be a class you created derived from <see cref="IdentityUser"/>.</typeparam>
-        /// <param name="services"></param>
         /// <param name="setupAction">Identity options configuration.</param>
         /// <returns>The same service collection so that multiple calls can be chained.</returns>
-        public static IServiceCollection AddRavenDbIdentity<TUser>(this IServiceCollection services, Action<IdentityOptions> setupAction)
+        public static IServiceCollection AddRavenDbIdentity<TUser>(this IServiceCollection services, Action<IdentityOptions> setupAction = null)
             where TUser : IdentityUser
         {
             // Add the AspNet identity system to work with our RavenDB identity objects.
-            services.AddIdentity<TUser, IdentityRole>(setupAction)
-                .AddDefaultTokenProviders();
+            if (setupAction != null)
+            {
+                services.AddIdentity<TUser, IdentityRole>(setupAction)
+                    .AddDefaultTokenProviders();
+            }
+            else
+            {
+                services.AddIdentity<TUser, IdentityRole>()
+                    .AddDefaultTokenProviders();
+            }
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserStore<TUser>, UserStore<TUser>>();
             services.AddScoped<Microsoft.AspNetCore.Identity.IRoleStore<IdentityRole>, RoleStore<IdentityRole>>();

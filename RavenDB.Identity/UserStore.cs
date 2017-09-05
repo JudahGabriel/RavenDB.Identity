@@ -42,7 +42,6 @@ namespace RavenDB.Identity
         public UserStore(IAsyncDocumentSession session)
         {
             this._session = session;
-            this._session.Advanced.DocumentStore.Conventions.RegisterIdConvention<IdentityUser>((dbname, commands, user) => "IdentityUsers/" + user.Id);
         }
 
         #region IDispoable implementation
