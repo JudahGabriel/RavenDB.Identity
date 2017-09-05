@@ -94,5 +94,25 @@ namespace RavenDB.Identity
 
             return services;
         }
+
+        /// <summary>
+        /// Registers a RavenDB as the user store.
+        /// </summary>
+        /// <typeparam name="TUser">The type of user. This should be a class you created derived from <see cref="IdentityUser"/>.</typeparam>
+        /// <param name="services"></param>
+        /// <param name="setupAction">Identity options configuration.</param>
+        /// <returns>The same service collection so that multiple calls can be chained.</returns>
+        public static IServiceCollection AddRavenDbIdentity<TUser>(this IServiceCollection services, Action<IdentityOptions> setupAction)
+            where TUser : IdentityUser
+        {
+            // Add the AspNet identity system to work with our RavenDB identity objects.
+            services.AddIdentity<TUser, IdentityRole>(setupAction)
+                .AddDefaultTokenProviders();
+
+            services.AddScoped<Microsoft.AspNetCore.Identity.IUserStore<TUser>, UserStore<TUser>>();
+            services.AddScoped<Microsoft.AspNetCore.Identity.IRoleStore<IdentityRole>, RoleStore<IdentityRole>>();
+
+            return services;
+        }
     }
 }
