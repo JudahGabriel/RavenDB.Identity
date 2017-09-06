@@ -250,18 +250,16 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
-        public Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
+        public async Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
-
+            
             var indexOfClaim = user.Claims.FindIndex(c => c.ClaimType == claim.Type && c.ClaimValue == claim.Value);
             if (indexOfClaim != -1)
             {
                 user.Claims.RemoveAt(indexOfClaim);
-                this.AddClaimsAsync(user, new[] { newClaim }, cancellationToken);
+                await this.AddClaimsAsync(user, new[] { newClaim }, cancellationToken);
             }
-
-            return Task.CompletedTask;
         }
 
         public Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
@@ -289,31 +287,65 @@ namespace RavenDB.Identity
 
         #region IUserRoleStore implementation
 
-        public Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
+        /// <summary>
+        /// Adds the user to the specified role.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <param name="roleName">The name of the role.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
-            if (!user.Roles.Contains(roleName, StringComparer.OrdinalIgnoreCase))
+            var roleNameLowered = roleName.ToLower();
+            if (!user.Roles.Contains(roleNameLowered, StringComparer.OrdinalIgnoreCase))
             {
-                user.Roles.Add(roleName);
+                user.GetRolesList().Add(roleNameLowered);
             }
 
-            return Task.CompletedTask;
+            // See if we have an IdentityRole with that.
+            var roleId = "IdentityRoles/" + roleNameLowered;
+            var existingRoleOrNull = await this.DbSession.LoadAsync<IdentityRole>(roleId, cancellationToken);
+            if (existingRoleOrNull == null)
+            {
+                ThrowIfDisposedOrCancelled(cancellationToken);
+                existingRoleOrNull = new IdentityRole(roleNameLowered);
+                await this.DbSession.StoreAsync(existingRoleOrNull, roleId, cancellationToken);
+            }
+
+            if (!existingRoleOrNull.Users.Contains(user.Id, StringComparer.OrdinalIgnoreCase))
+            {
+                existingRoleOrNull.Users.Add(user.Id);
+            }
         }
 
-        public Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
+        /// <summary>
+        /// Removes the user from the specified role.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="roleName"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
-            user.Roles.RemoveAll(r => string.Equals(r, roleName, StringComparison.OrdinalIgnoreCase));
-            return Task.CompletedTask;
+            user.GetRolesList().RemoveAll(r => string.Equals(r, roleName, StringComparison.OrdinalIgnoreCase));
+
+            var roleId = "IdentityRoles/" + roleName.ToLower();
+            var roleOrNull = await DbSession.LoadAsync<IdentityRole>(roleId, cancellationToken);
+            if (roleOrNull != null)
+            {
+                roleOrNull.Users.Remove(user.Id);
+            }
         }
 
         public Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
-            return Task.FromResult<IList<string>>(user.Roles);
+            return Task.FromResult<IList<string>>(new List<string>(user.Roles));
         }
 
         public Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
@@ -336,6 +368,7 @@ namespace RavenDB.Identity
 
             return DbSession.Query<TUser>()
                 .Where(u => u.Roles.Contains(roleName))
+                .Take(1024)
                 .ToListAsync();
         }
 

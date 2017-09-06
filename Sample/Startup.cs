@@ -32,6 +32,8 @@ namespace Sample
                 .AddRavenDbAsyncSession() // Create a RavenDB IAsyncDocumentSession for each request.
                 .AddRavenDbIdentity<AppUser>(); // Use Raven for users and roles.
 
+            // You can change the login path if need be.
+            // services.ConfigureApplicationCookie(options => options.LoginPath = "/my/login/path");
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();

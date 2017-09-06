@@ -242,7 +242,7 @@ namespace RavenDB.Identity
                 throw new ArgumentNullException(nameof(role));
             }
             role.Name = roleName;
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace RavenDB.Identity
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            return AsyncSession.LoadAsync<TRole>($"IdentityRoles/{normalizedName}");
+            return AsyncSession.LoadAsync<TRole>($"IdentityRoles/{normalizedName.ToLower()}");
         }
 
         /// <summary>

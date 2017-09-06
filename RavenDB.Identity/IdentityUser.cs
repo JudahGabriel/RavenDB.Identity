@@ -21,7 +21,7 @@ namespace RavenDB.Identity
         public virtual bool LockoutEnabled { get; set; }
         public virtual DateTimeOffset? LockoutEndDate { get; set; }
         public virtual bool TwoFactorAuthEnabled { get; set; }
-        public virtual List<string> Roles { get; private set; }
+        public virtual IReadOnlyList<string> Roles { get; private set; }
         public virtual List<IdentityUserClaim> Claims { get; private set; }
         public virtual List<UserLoginInfo> Logins { get; private set; }
 
@@ -37,6 +37,15 @@ namespace RavenDB.Identity
         {
             this.Id = userId;
             this.UserName = userName;
+        }
+
+        /// <summary>
+        /// Gets the mutable roles list. This shouldn't be modified by user code; roles should be changed via UserManager instead.
+        /// </summary>
+        /// <returns></returns>
+        internal List<string> GetRolesList()
+        {
+            return (List<string>)this.Roles;
         }
     }
 

@@ -97,7 +97,7 @@ namespace RavenDB.Identity
                 services.AddIdentity<TUser, IdentityRole>()
                     .AddDefaultTokenProviders();
             }
-
+            
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserStore<TUser>, UserStore<TUser>>();
             services.AddScoped<Microsoft.AspNetCore.Identity.IRoleStore<IdentityRole>, RoleStore<IdentityRole>>();
 
