@@ -439,14 +439,14 @@ namespace RavenDB.Identity
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
-            return Task.FromResult(user.IsEmailConfirmed);
+            return Task.FromResult(user.EmailConfirmed);
         }
 
         public Task SetEmailConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
-            user.IsEmailConfirmed = confirmed;
+            user.EmailConfirmed = confirmed;
             return Task.CompletedTask;
         }
 
@@ -542,7 +542,7 @@ namespace RavenDB.Identity
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
-            user.TwoFactorAuthEnabled = enabled;
+            user.TwoFactorEnabled = enabled;
             return Task.CompletedTask;
         }
 
@@ -550,7 +550,7 @@ namespace RavenDB.Identity
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
-            return Task.FromResult(user.TwoFactorAuthEnabled);
+            return Task.FromResult(user.TwoFactorEnabled);
         }
 
         #endregion

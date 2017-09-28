@@ -59,7 +59,7 @@ namespace Sample.Controllers
                 Username = user.UserName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                IsEmailConfirmed = user.IsEmailConfirmed,
+                IsEmailConfirmed = user.EmailConfirmed,
                 StatusMessage = StatusMessage
             };
 
@@ -318,7 +318,7 @@ namespace Sample.Controllers
             var model = new TwoFactorAuthenticationViewModel
             {
                 HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) != null,
-                Is2faEnabled = user.TwoFactorAuthEnabled,
+                Is2faEnabled = user.TwoFactorEnabled,
                 RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user),
             };
 
@@ -334,7 +334,7 @@ namespace Sample.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            if (!user.TwoFactorAuthEnabled)
+            if (!user.TwoFactorEnabled)
             {
                 throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.Id}'.");
             }
@@ -451,7 +451,7 @@ namespace Sample.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            if (!user.TwoFactorAuthEnabled)
+            if (!user.TwoFactorEnabled)
             {
                 throw new ApplicationException($"Cannot generate recovery codes for user with ID '{user.Id}' as they do not have 2FA enabled.");
             }
