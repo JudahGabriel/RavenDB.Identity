@@ -367,7 +367,7 @@ namespace RavenDB.Identity
             }
 
             return DbSession.Query<TUser>()
-                .Where(u => u.Roles.Contains(roleName))
+                .Where(u => u.Roles.Contains(roleName, StringComparer.InvariantCultureIgnoreCase))
                 .Take(1024)
                 .ToListAsync();
         }

@@ -28,7 +28,7 @@ namespace Sample.Controllers
                 .Query<AppUser>()
                 .ToListAsync();
             ViewBag.MessageFromRaven = $"Hi from RavenDB! There are {users.Count} users in the database. (◕‿◕✿)";
-
+            
             return View();
         }
 
@@ -40,7 +40,7 @@ namespace Sample.Controllers
         }
 
         // Require that the user be in the Admin role.
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "admin")] // Authorize should always use lower-case role names.
         public IActionResult AuthAdmin()
         {
             return View();
