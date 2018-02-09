@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using RavenDB.Identity;
+using Raven.Identity;
 
 namespace Sample.Models
 {

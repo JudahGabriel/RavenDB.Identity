@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections;
+﻿using Microsoft.AspNetCore.Identity;
+using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Raven.Client;
-using System.Runtime.CompilerServices;
 
-namespace RavenDB.Identity
+namespace Raven.Identity
 {
     /// <summary>
     /// UserStore for entities in a RavenDB database.
@@ -34,11 +31,13 @@ namespace RavenDB.Identity
         private readonly Func<IAsyncDocumentSession> getSessionFunc;
         private IAsyncDocumentSession _session;
 
+        /// <inheritdoc />
         public UserStore(Func<IAsyncDocumentSession> getSession)
         {
             this.getSessionFunc = getSession;
         }
 
+        /// <inheritdoc />
         public UserStore(IAsyncDocumentSession session)
         {
             this._session = session;
@@ -46,6 +45,7 @@ namespace RavenDB.Identity
 
         #region IDispoable implementation
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _disposed = true;
@@ -55,6 +55,7 @@ namespace RavenDB.Identity
 
         #region IUserStore implementation
 
+        /// <inheritdoc />
         public Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -62,6 +63,7 @@ namespace RavenDB.Identity
             return Task.FromResult(user.Id);
         }
 
+        /// <inheritdoc />
         public Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -69,6 +71,7 @@ namespace RavenDB.Identity
             return Task.FromResult(user.UserName);
         }
 
+        /// <inheritdoc />
         public Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -77,6 +80,7 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public Task<string> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -85,6 +89,7 @@ namespace RavenDB.Identity
             return Task.FromResult(user.UserName);
         }
 
+        /// <inheritdoc />
         public Task SetNormalizedUserNameAsync(TUser user, string normalizedName, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -93,13 +98,19 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Creates a user asynchronously.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
             if (string.IsNullOrEmpty(user.Id))
             {
                 var conventions = DbSession.Advanced.DocumentStore.Conventions;
-                var entityName = conventions.GetTypeTagName(typeof(TUser));
+                var entityName = conventions.GetCollectionName(typeof(TUser));
                 var separator = conventions.IdentityPartsSeparator;
                 var id = $"{entityName}{separator}{user.Email}";
                 user.Id = id;
@@ -115,6 +126,7 @@ namespace RavenDB.Identity
             return IdentityResult.Success;
         }
 
+        /// <inheritdoc />
         public Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -122,6 +134,7 @@ namespace RavenDB.Identity
             return Task.FromResult(IdentityResult.Success);
         }
 
+        /// <inheritdoc />
         public async Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -138,6 +151,7 @@ namespace RavenDB.Identity
             return IdentityResult.Success;
         }
 
+        /// <inheritdoc />
         public Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
             ThrowIfDisposedOrCancelled(cancellationToken);
@@ -145,6 +159,7 @@ namespace RavenDB.Identity
             return DbSession.LoadAsync<TUser>(userId);
         }
 
+        /// <inheritdoc />
         public async Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
             ThrowIfDisposedOrCancelled(cancellationToken);
@@ -168,6 +183,7 @@ namespace RavenDB.Identity
 
         #region IUserLoginStore implementation
 
+        /// <inheritdoc />
         public async Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -191,6 +207,7 @@ namespace RavenDB.Identity
             }
         }
 
+        /// <inheritdoc />
         public async Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -208,6 +225,7 @@ namespace RavenDB.Identity
             user.Logins.RemoveAll(x => x.LoginProvider == login.LoginProvider && x.ProviderKey == login.ProviderKey);
         }
 
+        /// <inheritdoc />
         public Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -215,6 +233,7 @@ namespace RavenDB.Identity
             return Task.FromResult(user.Logins.ToIList());
         }
 
+        /// <inheritdoc />
         public async Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
             var login = new UserLoginInfo(loginProvider, providerKey, string.Empty);
@@ -232,6 +251,7 @@ namespace RavenDB.Identity
 
         #region IUserClaimStore implementation
 
+        /// <inheritdoc />
         public Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -242,6 +262,7 @@ namespace RavenDB.Identity
             return Task.FromResult(result);
         }
 
+        /// <inheritdoc />
         public Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -250,6 +271,7 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public async Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -262,6 +284,7 @@ namespace RavenDB.Identity
             }
         }
 
+        /// <inheritdoc />
         public Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -270,7 +293,8 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
-        public Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
+        /// <inheritdoc />
+        public async Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
         {
             ThrowIfDisposedOrCancelled(cancellationToken);
             if (claim == null)
@@ -278,9 +302,10 @@ namespace RavenDB.Identity
                 throw new ArgumentNullException(nameof(claim));
             }
 
-            return DbSession.Query<TUser>()
+            var list = await DbSession.Query<TUser>()
                 .Where(u => u.Claims.Any(c => c.ClaimType == claim.Type && c.ClaimValue == claim.Value))
                 .ToListAsync();
+            return list;
         }
 
         #endregion
@@ -341,6 +366,7 @@ namespace RavenDB.Identity
             }
         }
 
+        /// <inheritdoc />
         public Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -348,6 +374,7 @@ namespace RavenDB.Identity
             return Task.FromResult<IList<string>>(new List<string>(user.Roles));
         }
 
+        /// <inheritdoc />
         public Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(roleName))
@@ -358,7 +385,8 @@ namespace RavenDB.Identity
             return Task.FromResult(user.Roles.Contains(roleName, StringComparer.OrdinalIgnoreCase));
         }
 
-        public Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+        /// <inheritdoc />
+        public async Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
         {
             ThrowIfDisposedOrCancelled(cancellationToken);
             if (string.IsNullOrEmpty(roleName))
@@ -366,16 +394,18 @@ namespace RavenDB.Identity
                 throw new ArgumentNullException(nameof(roleName));
             }
 
-            return DbSession.Query<TUser>()
+            var users = await DbSession.Query<TUser>()
                 .Where(u => u.Roles.Contains(roleName, StringComparer.InvariantCultureIgnoreCase))
                 .Take(1024)
                 .ToListAsync();
+            return users;
         }
 
         #endregion
 
         #region IUserPasswordStore implementation
 
+        /// <inheritdoc />
         public Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -384,6 +414,7 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public Task<string> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -391,6 +422,7 @@ namespace RavenDB.Identity
             return Task.FromResult(user.PasswordHash);
         }
 
+        /// <inheritdoc />
         public Task<bool> HasPasswordAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -402,6 +434,7 @@ namespace RavenDB.Identity
 
         #region IUserSecurityStampStore implementation
 
+        /// <inheritdoc />
         public Task SetSecurityStampAsync(TUser user, string stamp, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -410,6 +443,7 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public Task<string> GetSecurityStampAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -421,6 +455,7 @@ namespace RavenDB.Identity
 
         #region IUserEmailStore implementation
 
+        /// <inheritdoc />
         public Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken)
         {
             ThrowIfDisposedOrCancelled(cancellationToken);
@@ -428,6 +463,7 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public Task<string> GetEmailAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -435,6 +471,7 @@ namespace RavenDB.Identity
             return Task.FromResult(user.Email);
         }
 
+        /// <inheritdoc />
         public Task<bool> GetEmailConfirmedAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -442,6 +479,7 @@ namespace RavenDB.Identity
             return Task.FromResult(user.EmailConfirmed);
         }
 
+        /// <inheritdoc />
         public Task SetEmailConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -450,6 +488,7 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
         {
             ThrowIfDisposedOrCancelled(cancellationToken);
@@ -458,6 +497,7 @@ namespace RavenDB.Identity
                 .FirstOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
         }
 
+        /// <inheritdoc />
         public Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -466,6 +506,7 @@ namespace RavenDB.Identity
             return Task.FromResult(user.Email);
         }
 
+        /// <inheritdoc />
         public Task SetNormalizedEmailAsync(TUser user, string normalizedEmail, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -482,6 +523,7 @@ namespace RavenDB.Identity
 
         #region IUserLockoutStore implementation
 
+        /// <inheritdoc />
         public Task<DateTimeOffset?> GetLockoutEndDateAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -489,6 +531,7 @@ namespace RavenDB.Identity
             return Task.FromResult(user.LockoutEndDate);
         }
 
+        /// <inheritdoc />
         public Task SetLockoutEndDateAsync(TUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -497,6 +540,7 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public Task<int> IncrementAccessFailedCountAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -505,6 +549,7 @@ namespace RavenDB.Identity
             return Task.FromResult(user.AccessFailedCount);
         }
 
+        /// <inheritdoc />
         public Task ResetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -513,6 +558,7 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public Task<int> GetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -520,12 +566,14 @@ namespace RavenDB.Identity
             return Task.FromResult(user.AccessFailedCount);
         }
 
+        /// <inheritdoc />
         public Task<bool> GetLockoutEnabledAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
             return Task.FromResult(user.LockoutEnabled);
         }
 
+        /// <inheritdoc />
         public Task SetLockoutEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -538,6 +586,7 @@ namespace RavenDB.Identity
 
         #region IUserTwoFactorStore implementation
 
+        /// <inheritdoc />
         public Task SetTwoFactorEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -546,6 +595,7 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public Task<bool> GetTwoFactorEnabledAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -557,6 +607,7 @@ namespace RavenDB.Identity
 
         #region IUserPhoneNumberStore implementation
 
+        /// <inheritdoc />
         public Task SetPhoneNumberAsync(TUser user, string phoneNumber, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -565,6 +616,7 @@ namespace RavenDB.Identity
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public Task<string> GetPhoneNumberAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -572,6 +624,7 @@ namespace RavenDB.Identity
             return Task.FromResult(user.PhoneNumber);
         }
 
+        /// <inheritdoc />
         public Task<bool> GetPhoneNumberConfirmedAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -579,6 +632,7 @@ namespace RavenDB.Identity
             return Task.FromResult(user.IsPhoneNumberConfirmed);
         }
 
+        /// <inheritdoc />
         public Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
@@ -596,7 +650,8 @@ namespace RavenDB.Identity
                 if (_session == null)
                 {
                     _session = getSessionFunc();
-                    _session.Advanced.DocumentStore.Conventions.RegisterIdConvention<IdentityUser>((dbname, commands, user) => "IdentityUsers/" + user.Id);
+                    // TODO: do we really need this? I don't believe so. Brought over from Raven 3.x - the new 4.0 uses async version only.
+                    //_session.Advanced.DocumentStore.Conventions.RegisterIdConvention<IdentityUser>((dbname, commands, user) => "IdentityUsers/" + user.Id);
                 }
                 return _session;
             }

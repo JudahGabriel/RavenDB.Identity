@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 
-namespace RavenDB.Identity
+namespace Raven.Identity
 {
     /// <summary>
     /// Base user class for RavenDB Identity. Inherit from this class to add your own properties.
@@ -107,25 +107,63 @@ namespace RavenDB.Identity
         }
     }
 
+    /// <summary>
+    /// Defines a user login.
+    /// </summary>
     public sealed class IdentityUserLogin
     {
+        /// <summary>
+        /// The ID of the login.
+        /// </summary>
         public string Id { get; set; }
+        /// <summary>
+        /// The user ID.
+        /// </summary>
         public string UserId { get; set; }
+        /// <summary>
+        /// The login provider.
+        /// </summary>
         public string Provider { get; set; }
+        /// <summary>
+        /// The login provider key.
+        /// </summary>
         public string ProviderKey { get; set; }
     }
 
+    /// <summary>
+    /// A login claim.
+    /// </summary>
     public class IdentityUserClaim
     {
+        /// <summary>
+        /// The type of the login claim.
+        /// </summary>
         public virtual string ClaimType { get; set; }
+        /// <summary>
+        /// The login claim value.
+        /// </summary>
         public virtual string ClaimValue { get; set; }
     }
 
+    /// <summary>
+    /// Entity that aides in helping us load users by a well-known name directly from the RavenDB ACID storage engine, bypassing the eventually consistent RavenDB indexes.
+    /// </summary>
     public sealed class IdentityUserByUserName
     {
+        /// <summary>
+        /// The ID of the user.
+        /// </summary>
         public string UserId { get; set; }
+        /// <summary>
+        /// The user name.
+        /// </summary>
         public string UserName { get; set; }
 
+        /// <summary>
+        /// Creates a new IdentityUserByUserName.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="userName"></param>
         public IdentityUserByUserName(string userId, string userName)
         {
             UserId = userId;

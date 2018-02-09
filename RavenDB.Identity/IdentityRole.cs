@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace RavenDB.Identity
+namespace Raven.Identity
 {
     /// <summary>
     /// The default implementation of <see cref="IdentityRole"/> which uses a string as the primary key.

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Raven.Abstractions.Exceptions;
 using Raven.Client;
 using System;
 using System.Collections.Generic;
@@ -10,8 +9,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Raven.Client.Documents.Session;
+using Raven.Client.Exceptions;
 
-namespace RavenDB.Identity
+namespace Raven.Identity
 {
     /// <summary>
     /// 
