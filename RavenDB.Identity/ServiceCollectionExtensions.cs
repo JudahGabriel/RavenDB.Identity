@@ -81,5 +81,26 @@ namespace Raven.Identity
             serviceCollection.Add(new ServiceDescriptor(typeof(IAsyncDocumentSession), p => db.OpenAsyncSession(), ServiceLifetime.Scoped));
             return serviceCollection;
         }
+
+        /// <summary>
+        /// Registers a RavenDB <see cref="IAsyncDocumentSession"/> to be created and disposed on each request. 
+        /// This requires for an <see cref="IDocumentStore"/> to be added to dependency injection services.
+        /// </summary>
+        /// <example>
+        ///     <code>
+        ///         public void ConfigureServices(IServiceCollection services) 
+        ///         {
+        ///             services.AddRavenDbAsyncSession();
+        ///         }
+        ///     </code>
+        /// </example>
+        /// <param name="serviceCollection"> The <see cref="IServiceCollection" /> to add services to. </param>
+        /// <remarks>Based on code from https://github.com/maqduni/AspNetCore.Identity.RavenDb/blob/master/src/Maqduni.AspNetCore.Identity.RavenDb/RavenDbServiceCollectionExtensions.cs</remarks>
+        /// <returns>The same service collection so that multiple calls can be chained.</returns>
+        public static IServiceCollection AddRavenDbAsyncSession(this IServiceCollection serviceCollection)
+        {
+            serviceCollection.Add(new ServiceDescriptor(typeof(IAsyncDocumentSession), p => p.GetRequiredService<IDocumentStore>().OpenAsyncSession(), ServiceLifetime.Scoped));
+            return serviceCollection;
+        }
     }
 }
