@@ -10,7 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sample.Models;
 using Sample.Services;
-using RavenDB.Identity;
+using Raven.Identity;
+using Raven.Client.Documents;
 
 namespace Sample
 {
@@ -26,10 +27,19 @@ namespace Sample
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            // Connect to a Raven server. We're using the public test playground at http://live-test.ravendb.net
+            // NOTE: Getting a DatabaseDoesNotExistException? Go to http://live-test.ravendb.net and create a database with the name 'Raven.Identity.Sample'
+            var docStore = new DocumentStore
+            {
+                Urls = new string[] { "http://live-test.ravendb.net" },
+                Database = "Raven.Identity.Sample"
+            };
+            docStore.Initialize();
+            
             // Add RavenDB and identity.
             services
-                .AddRavenDb(Configuration.GetConnectionString("RavenDbConnection")) // Create a RavenDB DocumentStore singleton.
-                .AddRavenDbAsyncSession() // Create a RavenDB IAsyncDocumentSession for each request.
+                .AddRavenDbAsyncSession(docStore) // Create a RavenDB IAsyncDocumentSession for each request.
                 .AddRavenDbIdentity<AppUser>(); // Use Raven for users and roles.
 
             // You can change the login path if need be.

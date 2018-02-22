@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
 
-namespace RavenDB.Identity
+namespace Raven.Identity
 {
     /// <summary>
     /// Represents a claim that is granted to all users within a role.

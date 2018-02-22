@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections;
+﻿using Microsoft.AspNetCore.Identity;
+using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Raven.Client;
-using System.Runtime.CompilerServices;
 
-namespace RavenDB.Identity
+namespace Raven.Identity
 {
     /// <summary>
     /// UserStore for entities in a RavenDB database.
@@ -117,7 +114,7 @@ namespace RavenDB.Identity
             if (string.IsNullOrEmpty(user.Id))
             {
                 var conventions = DbSession.Advanced.DocumentStore.Conventions;
-                var entityName = conventions.GetTypeTagName(typeof(TUser));
+                var entityName = conventions.GetCollectionName(typeof(TUser));
                 var separator = conventions.IdentityPartsSeparator;
                 var id = $"{entityName}{separator}{user.Email}";
                 user.Id = id;
@@ -301,7 +298,7 @@ namespace RavenDB.Identity
         }
 
         /// <inheritdoc />
-        public Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
+        public async Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
         {
             ThrowIfDisposedOrCancelled(cancellationToken);
             if (claim == null)
@@ -309,9 +306,10 @@ namespace RavenDB.Identity
                 throw new ArgumentNullException(nameof(claim));
             }
 
-            return DbSession.Query<TUser>()
+            var list = await DbSession.Query<TUser>()
                 .Where(u => u.Claims.Any(c => c.ClaimType == claim.Type && c.ClaimValue == claim.Value))
                 .ToListAsync();
+            return list;
         }
 
         #endregion
@@ -380,7 +378,7 @@ namespace RavenDB.Identity
         }
 
         /// <inheritdoc />
-        public Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+        public async Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
         {
             ThrowIfDisposedOrCancelled(cancellationToken);
             if (string.IsNullOrEmpty(roleName))
@@ -388,10 +386,11 @@ namespace RavenDB.Identity
                 throw new ArgumentNullException(nameof(roleName));
             }
 
-            return DbSession.Query<TUser>()
+            var users = await DbSession.Query<TUser>()
                 .Where(u => u.Roles.Contains(roleName, StringComparer.InvariantCultureIgnoreCase))
                 .Take(1024)
                 .ToListAsync();
+            return users;
         }
 
         #endregion
@@ -660,7 +659,8 @@ namespace RavenDB.Identity
                 if (_session == null)
                 {
                     _session = getSessionFunc();
-                    _session.Advanced.DocumentStore.Conventions.RegisterIdConvention<IdentityUser>((dbname, commands, user) => "IdentityUsers/" + user.Id);
+                    // TODO: do we really need this? I don't believe so. Brought over from Raven 3.x - the new 4.0 uses async version only.
+                    //_session.Advanced.DocumentStore.Conventions.RegisterIdConvention<IdentityUser>((dbname, commands, user) => "IdentityUsers/" + user.Id);
                 }
                 return _session;
             }
