@@ -14,11 +14,11 @@
     <RepositoryUrl>https://github.com/JudahGabriel/RavenDB.Identity</RepositoryUrl>
     <PackageLicenseUrl>https://github.com/JudahGabriel/RavenDB.Identity/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageIconUrl>https://github.com/JudahGabriel/RavenDB.Identity/blob/master/RavenDB.Identity/nuget-icon.png?raw=true</PackageIconUrl>
-    <copyright>Copyright 2017 BitShuva</copyright>
+    <copyright>Copyright 2018 BitShuva</copyright>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>3.0.0</Version>
+    <Version>3.1.0</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 

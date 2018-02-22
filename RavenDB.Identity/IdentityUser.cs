@@ -73,6 +73,11 @@ namespace RavenDB.Identity
         public virtual bool TwoFactorEnabled { get; set; }
 
         /// <summary>
+        /// The two-factor authenticator key.
+        /// </summary>
+        public string TwoFactorAuthenticatorKey { get; set; }
+
+        /// <summary>
         /// The roles of the user. To modify the user's roles, use <see cref="UserManager{TUser}.AddToRoleAsync(TUser, string)"/> nad <see cref="UserManager{TUser}.RemoveFromRolesAsync(TUser, IEnumerable{string})"/>.
         /// </summary>
         public virtual IReadOnlyList<string> Roles { get; private set; }
