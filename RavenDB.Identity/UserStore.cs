@@ -25,7 +25,8 @@ namespace Raven.Identity
         IUserLockoutStore<TUser>,
         IUserTwoFactorStore<TUser>, 
         IUserPhoneNumberStore<TUser>,
-        IUserAuthenticatorKeyStore<TUser>
+        IUserAuthenticatorKeyStore<TUser>,
+        IUserAuthenticationTokenStore<TUser>
         where TUser : IdentityUser
     {
         private bool _disposed;
@@ -648,6 +649,55 @@ namespace Raven.Identity
         public Task<string> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.TwoFactorAuthenticatorKey);
+        }
+
+        #endregion
+
+        #region IUserAuthenticationTokenStore
+
+        /// <inheritdoc />
+        public async Task SetTokenAsync(TUser user, string loginProvider, string name, string value, CancellationToken cancellationToken)
+        {
+            var id = IdentityUserAuthToken.GetWellKnownId(DbSession.Advanced.DocumentStore, user.Id, loginProvider, name);
+            ThrowIfDisposedOrCancelled(cancellationToken);
+
+            var existingOrNull = await DbSession.LoadAsync<IdentityUserAuthToken>(id);
+            if (existingOrNull == null)
+            {
+                existingOrNull = new IdentityUserAuthToken
+                {
+                    Id = id,
+                    LoginProvider = loginProvider,
+                    Name = name,
+                    UserId = user.Id,
+                    Value = value
+                };
+                await DbSession.StoreAsync(existingOrNull);
+            }
+
+            existingOrNull.Value = value;
+        }
+
+        /// <inheritdoc />
+        public Task RemoveTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
+        {
+            var id = IdentityUserAuthToken.GetWellKnownId(DbSession.Advanced.DocumentStore, user.Id, loginProvider, name);
+            DbSession.Delete(id);
+
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public async Task<string> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
+        {
+            var id = IdentityUserAuthToken.GetWellKnownId(DbSession.Advanced.DocumentStore, user.Id, loginProvider, name);
+            var tokenOrNull = await DbSession.LoadAsync<IdentityUserAuthToken>(id);
+            if (tokenOrNull == null)
+            {
+                return null;
+            }
+
+            return tokenOrNull.Value;
         }
 
         #endregion
