@@ -7,7 +7,7 @@ using System.Text;
 namespace Raven.Identity
 {
     /// <summary>
-    /// A two-factor authentication authorization token.
+    /// A authorization token created by a login provider.
     /// </summary>
     public class IdentityUserAuthToken
     {

@@ -26,7 +26,8 @@ namespace Raven.Identity
         IUserTwoFactorStore<TUser>, 
         IUserPhoneNumberStore<TUser>,
         IUserAuthenticatorKeyStore<TUser>,
-        IUserAuthenticationTokenStore<TUser>
+        IUserAuthenticationTokenStore<TUser>,
+        IUserTwoFactorRecoveryCodeStore<TUser>
         where TUser : IdentityUser
     {
         private bool _disposed;
@@ -698,6 +699,25 @@ namespace Raven.Identity
             }
 
             return tokenOrNull.Value;
+        }
+        
+        /// <inheritdoc />
+        public Task ReplaceCodesAsync(TUser user, IEnumerable<string> recoveryCodes, CancellationToken cancellationToken)
+        {
+            user.TwoFactorRecoveryCodes = new List<string>(recoveryCodes);
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public Task<bool> RedeemCodeAsync(TUser user, string code, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.TwoFactorRecoveryCodes.Remove(code));
+        }
+
+        /// <inheritdoc />
+        public Task<int> CountCodesAsync(TUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.TwoFactorRecoveryCodes.Count);
         }
 
         #endregion

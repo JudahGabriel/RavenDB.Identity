@@ -93,6 +93,11 @@ namespace Raven.Identity
         public virtual List<UserLoginInfo> Logins { get; private set; }
 
         /// <summary>
+        /// The list of two factor authentication recovery codes.
+        /// </summary>
+        public virtual List<string> TwoFactorRecoveryCodes { get; set; }
+
+        /// <summary>
         /// Creates a new IdentityUser.
         /// </summary>
         public IdentityUser()
