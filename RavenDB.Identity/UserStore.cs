@@ -27,7 +27,8 @@ namespace Raven.Identity
         IUserPhoneNumberStore<TUser>,
         IUserAuthenticatorKeyStore<TUser>,
         IUserAuthenticationTokenStore<TUser>,
-        IUserTwoFactorRecoveryCodeStore<TUser>
+        IUserTwoFactorRecoveryCodeStore<TUser>,
+        IQueryableUserStore<TUser>
         where TUser : IdentityUser
     {
         private bool _disposed;
@@ -719,6 +720,15 @@ namespace Raven.Identity
         {
             return Task.FromResult(user.TwoFactorRecoveryCodes.Count);
         }
+
+        #endregion
+
+        #region IQueryableUserStore
+
+        /// <summary>
+        /// Gets the users as an IQueryable.
+        /// </summary>
+        public IQueryable<TUser> Users => this.DbSession.Query<TUser>();
 
         #endregion
 
