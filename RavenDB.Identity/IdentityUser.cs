@@ -105,6 +105,7 @@ namespace Raven.Identity
             this.Claims = new List<IdentityUserClaim>();
             this.Roles = new List<string>();
             this.Logins = new List<UserLoginInfo>();
+            this.TwoFactorRecoveryCodes = new List<string>();
         }
 
         /// <summary>

@@ -29,29 +29,14 @@ namespace Sample
         {
 
             // Connect to a Raven server. We're using the public test playground at http://live-test.ravendb.net
-            // NOTE: Getting a DatabaseDoesNotExistException? Go to http://live-test.ravendb.net and create a database with the name 'Raven.Identity.Sample'
+            var databaseName = "Raven.Identity.Sample";
             var docStore = new DocumentStore
             {
                 Urls = new string[] { "http://live-test.ravendb.net" },
-                Database = "Raven.Identity.Sample"
+                Database = databaseName
             };
             docStore.Initialize();
-
-            // Create the database if it doesn't exist yet.
-            try
-            {
-                using (var dbSession = docStore.OpenSession())
-                {
-                    dbSession.Query<AppUser>().Take(0).ToList();
-                }
-            }
-            catch (Raven.Client.Exceptions.Database.DatabaseDoesNotExistException)
-            {
-                docStore.Maintenance.Server.Send(new Raven.Client.ServerWide.Operations.CreateDatabaseOperation(new Raven.Client.ServerWide.DatabaseRecord
-                {
-                    DatabaseName = "Raven.Identity.Sample"
-                }));
-            }
+            CreateDatabaseIfNotExists(docStore, databaseName);
             
             // Add RavenDB and identity.
             services
@@ -65,6 +50,24 @@ namespace Sample
             services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddMvc();
+        }
+
+        private void CreateDatabaseIfNotExists(IDocumentStore docStore, string databaseName)
+        {
+            try
+            {
+                using (var dbSession = docStore.OpenSession())
+                {
+                    dbSession.Query<AppUser>().Take(0).ToList();
+                }
+            }
+            catch (Raven.Client.Exceptions.Database.DatabaseDoesNotExistException)
+            {
+                docStore.Maintenance.Server.Send(new Raven.Client.ServerWide.Operations.CreateDatabaseOperation(new Raven.Client.ServerWide.DatabaseRecord
+                {
+                    DatabaseName = databaseName
+                }));
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

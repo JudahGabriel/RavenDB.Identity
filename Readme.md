@@ -11,7 +11,7 @@ public void ConfigureServices(IServiceCollection services)
 {
 	// Add RavenDB and identity.
 	services
-		.AddRavenDbAsyncSession(docStore) // Create a RavenDB IAsyncDocumentSession for each request. docStore is your IDocumentStore instance.
+		.AddRavenDbAsyncSession(docStore) // Create a RavenDB IAsyncDocumentSession for each request. docStore is your IDocumentStore instance. You're responsible for calling .SaveChanges after each request.
 		.AddRavenDbIdentity<AppUser>(); // Use Raven for users and roles. AppUser is your class, a simple DTO to hold user data. See https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Models/AppUser.cs
 
 	...
@@ -22,6 +22,6 @@ public void ConfigureServices(IServiceCollection services)
 
 3. You're done! 
 
-Need help? See the [sample app](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Sample).
+Need help? See the [sample app](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Sample). It supports regular sign-ins as well as 2-factor authentication.
 
 Not using .NET Core? See our [sister project](https://github.com/JudahGabriel/RavenDB.AspNet.Identity) for a RavenDB Identity Provider for MVC 5+ and WebAPI 2+ on the full .NET Framework.
