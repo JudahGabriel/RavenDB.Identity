@@ -19,7 +19,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>4.4.0</Version>
+    <Version>4.4.1</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
     <PackageReleaseNotes>Implemented IQueryable&lt;TUser&gt;, making it work with 2FA.</PackageReleaseNotes>
