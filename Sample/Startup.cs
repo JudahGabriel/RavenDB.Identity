@@ -36,6 +36,22 @@ namespace Sample
                 Database = "Raven.Identity.Sample"
             };
             docStore.Initialize();
+
+            // Create the database if it doesn't exist yet.
+            try
+            {
+                using (var dbSession = docStore.OpenSession())
+                {
+                    dbSession.Query<AppUser>().Take(0).ToList();
+                }
+            }
+            catch (Raven.Client.Exceptions.Database.DatabaseDoesNotExistException)
+            {
+                docStore.Maintenance.Server.Send(new Raven.Client.ServerWide.Operations.CreateDatabaseOperation(new Raven.Client.ServerWide.DatabaseRecord
+                {
+                    DatabaseName = "Raven.Identity.Sample"
+                }));
+            }
             
             // Add RavenDB and identity.
             services
