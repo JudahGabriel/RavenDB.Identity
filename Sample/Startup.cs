@@ -12,6 +12,7 @@ using Sample.Models;
 using Sample.Services;
 using Raven.Identity;
 using Raven.Client.Documents;
+using Sample.Extensions;
 
 namespace Sample
 {
@@ -27,7 +28,6 @@ namespace Sample
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             // Connect to a Raven server. We're using the public test playground at http://live-test.ravendb.net
             var databaseName = "Raven.Identity.Sample";
             var docStore = new DocumentStore
@@ -35,8 +35,7 @@ namespace Sample
                 Urls = new string[] { "http://live-test.ravendb.net" },
                 Database = databaseName
             };
-            docStore.Initialize();
-            CreateDatabaseIfNotExists(docStore, databaseName);
+            docStore.Initialize().EnsureExists();
             
             // Add RavenDB and identity.
             services
@@ -50,24 +49,6 @@ namespace Sample
             services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddMvc();
-        }
-
-        private void CreateDatabaseIfNotExists(IDocumentStore docStore, string databaseName)
-        {
-            try
-            {
-                using (var dbSession = docStore.OpenSession())
-                {
-                    dbSession.Query<AppUser>().Take(0).ToList();
-                }
-            }
-            catch (Raven.Client.Exceptions.Database.DatabaseDoesNotExistException)
-            {
-                docStore.Maintenance.Server.Send(new Raven.Client.ServerWide.Operations.CreateDatabaseOperation(new Raven.Client.ServerWide.DatabaseRecord
-                {
-                    DatabaseName = databaseName
-                }));
-            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -94,6 +75,24 @@ namespace Sample
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        private void CreateDatabaseIfNotExists(IDocumentStore docStore, string databaseName)
+        {
+            try
+            {
+                using (var dbSession = docStore.OpenSession())
+                {
+                    dbSession.Query<AppUser>().Take(0).ToList();
+                }
+            }
+            catch (Raven.Client.Exceptions.Database.DatabaseDoesNotExistException)
+            {
+                docStore.Maintenance.Server.Send(new Raven.Client.ServerWide.Operations.CreateDatabaseOperation(new Raven.Client.ServerWide.DatabaseRecord
+                {
+                    DatabaseName = databaseName
+                }));
+            }
         }
     }
 }
