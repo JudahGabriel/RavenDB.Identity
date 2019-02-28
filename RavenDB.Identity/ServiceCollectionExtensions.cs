@@ -22,7 +22,7 @@ namespace Raven.Identity
         public static IServiceCollection AddRavenDbIdentity<TUser>(this IServiceCollection services, Action<IdentityOptions> setupAction = null)
             where TUser : IdentityUser
         {
-			return AddRavenDbIdentity<TUser>(services, setupAction);
+			return AddRavenDbIdentity<TUser, IdentityRole>(services, setupAction);
         }
 
 		/// <summary>
