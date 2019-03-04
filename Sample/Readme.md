@@ -3,10 +3,10 @@
 This is a Razor Pages sample that shows how to use Raven.Identity.
 
 There are four areas of interest:
- 1. appsettings.json - where we configure our connection to Raven.
- 2. AppUser.cs - our user class containing any user data like FirstName and LastName.
- 3. RavenSaveChangesAsyncFilter.cs - where we save changes to Raven after actions finish executing. This makes sense for a Razor Pages project. For an MVC or Web API project, use a RavenController base class instead.
- 4. Startup.cs - where we wire up everything
+ 1. [appsettings.json](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/appsettings.json) - where we configure our connection to Raven.
+ 2. [AppUser.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Models/AppUser.cs) - our user class containing any user data like FirstName and LastName.
+ 3. [RavenSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs) - where we save changes to Raven after actions finish executing. This makes sense for a Razor Pages project. For an MVC or Web API project, use a RavenController base class instead.
+ 4. [Startup.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Startup.cs) - where we wire up everything.
 
 More details below.
 
@@ -43,7 +43,7 @@ While this step isn't strictly necessary -- it's possible to skip AppUser and ju
 
 ## 3. RavenSaveChangesAsyncFilter
 
-In Startup.cs (next step), we'll tell AspNetCore to create an `IAsyncDocumentSession` for every request. But we need to `.SaveChangesAsync()` for anything to persist in Raven.
+We need to `.SaveChangesAsync()` for anything to persist in Raven. Where should we do this?
 
 While we could call `.SaveChangesAsync()` in the code-behind of every Razor page, that is tedious and error prone. Instead, we create a Razor action filter to save changes, [RaveSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs):
 
@@ -90,6 +90,8 @@ public void ConfigureServices(IServiceCollection services)
 	// Grab our RavenSettings object from appsettings.json.
     services.Configure<RavenSettings>(Configuration.GetSection("RavenSettings"));
 
+	...
+
 	// Add an IDocumentStore singleton, with settings pulled from the RavenSettings.
     services.AddRavenDbDocStore();
 
@@ -98,10 +100,9 @@ public void ConfigureServices(IServiceCollection services)
     services.AddRavenDbAsyncSession();
 
 	// Use Raven for our users
-	var identityModel = services.AddRavenDbIdentity<AppUser>();
-
-	// Optional: some default Razor Pages UI for login/register/forgot password/etc.
-	identityBuilder.AddDefaultUI(UIFramework.Bootstrap4); 
+	services.AddRavenDbIdentity<AppUser>();
+	
+	...
 
 	// Call .SaveChangesAsync() after each action.
 	services

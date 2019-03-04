@@ -13,26 +13,41 @@ public class AppUser : Raven.Identity.IdentityUser
 }
 ```
 
-2. In Startup.cs:
+2. In appsettings.json, configure your connection to Raven:
+
+```json
+"RavenSettings": {
+    "Urls": [
+        "http://live-test.ravendb.net"
+    ],
+    "DatabaseName": "Raven.Identity.Sample",
+    "CertFilePath": "",
+    "CertPassword": ""
+},
+```
+
+3. In Startup.cs, wire it all up:
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-	// Grab our RavenSettings object from appsettings.json.
+    // Grab our RavenSettings object from appsettings.json.
     services.Configure<RavenSettings>(Configuration.GetSection("RavenSettings"));
-
-	// Add RavenDB and identity.
-	services
-		.AddRavenDbDocStore() // Create an IDocumentStore singleton from the RavenSettings.
-		.AddRavenDbAsyncSession() // Create a RavenDB IAsyncDocumentSession for each request. docStore is your IDocumentStore instance. You're responsible for calling .SaveChanges after each request.
-		.AddRavenDbIdentity<AppUser>(); // Use Raven to manage users and roles.
-
-	...
+    
+    ...
+    
+    // Add RavenDB and identity.
+    services
+        .AddRavenDbDocStore() // Create an IDocumentStore singleton from the RavenSettings.
+        .AddRavenDbAsyncSession() // Create a RavenDB IAsyncDocumentSession for each request. docStore is your IDocumentStore instance. You're responsible for calling .SaveChanges after each request.
+        .AddRavenDbIdentity<AppUser>(); // Use Raven to manage users and roles.
+    
+    ...
 }
 ```
 
-3. In your controller actions, call .SaveChanges when you're done making changes. Typically this is done via a RavenController base class for MVC/WebAPI projects, or via an [ActionFilter](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs) for Razor Pages projects.
+4. In your controller actions, call .SaveChangesAsync() when you're done making changes. Typically this is done via a RavenController base class for MVC/WebAPI projects or via an action filter. See our Sample [RavenSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs).
 
-Need help? See the [sample app](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Sample) to see it all in action.
+Need help? Checkout the [sample app](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Sample) to see it all in action.
 
-Not using .NET Core? See our [sister project](https://github.com/JudahGabriel/RavenDB.AspNet.Identity) for a RavenDB Identity Provider for MVC 5+ and WebAPI 2+ on the full .NET Framework.
+Not using .NET Core? See our [sister project](https://github.com/JudahGabriel/RavenDB.AspNet.Identity) for a RavenDB Identity Provider for the full .NET Framework.
