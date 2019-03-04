@@ -15,14 +15,14 @@
     <ReleaseNotes>Added support for Two Factor auth.</ReleaseNotes>
     <PackageLicenseUrl>https://github.com/JudahGabriel/RavenDB.Identity/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageIconUrl>https://github.com/JudahGabriel/RavenDB.Identity/blob/master/RavenDB.Identity/nuget-icon.png?raw=true</PackageIconUrl>
-    <copyright>Copyright 2018 BitShuva</copyright>
+    <copyright>Copyright 2019 BitShuva</copyright>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>4.4.1</Version>
+    <Version>5.0.0</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
-    <PackageReleaseNotes>Implemented IQueryable&lt;TUser&gt;, making it work with 2FA.</PackageReleaseNotes>
+    <PackageReleaseNotes>Now supporting IdentityRole generic param to AddRavenDbIdentity. Using RavenDB.DependencyInjection instead of providing our own .AddRavenDbDocStore() and .AddRavenDbAsyncSession(). Raven.Identity.IdentityUser now better conforms to Microsoft's IdentityUser, which is a breaking change.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
