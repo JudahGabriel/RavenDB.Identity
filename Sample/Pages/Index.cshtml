@@ -1,0 +1,21 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+@inject SignInManager<AppUser> SignInManager
+
+<div class="text-center">
+    <h1 class="display-4">RavenDB Identity Sample</h1>
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <p>Hi, @User.Identity.Name. You're currently signed in. 😎</p>
+        <p>
+            Your user is saved in Raven. <a href="http://live-test.ravendb.net/studio/index.html#databases/documents?collection=AppUsers&database=Raven.Identity.Sample">View it</a>.
+        </p>
+    }
+    else
+    {
+        <p>You're not signed in. Click <a target="_blank" href="/account/register">register</a> or <a href="/account/login">login</a> to try out Raven.Identity.</p>
+    }
+</div>

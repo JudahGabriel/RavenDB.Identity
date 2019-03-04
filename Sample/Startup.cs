@@ -1,18 +1,22 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sample.Models;
-using Sample.Services;
+using Raven.DependencyInjection;
 using Raven.Identity;
 using Raven.Client.Documents;
-using Sample.Extensions;
+using Sample.Common;
 
 namespace Sample
 {
@@ -28,27 +32,33 @@ namespace Sample
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Connect to a Raven server. We're using the public test playground at http://live-test.ravendb.net
-            var databaseName = "Raven.Identity.Sample";
-            var docStore = new DocumentStore
+            services.Configure<CookiePolicyOptions>(options =>
             {
-                Urls = new string[] { "http://live-test.ravendb.net" },
-                Database = databaseName
-            };
-            docStore.Initialize().EnsureExists();
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => false;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            // Grab our RavenSettings object from appsettings.json.
+            services.Configure<RavenSettings>(Configuration.GetSection("RavenSettings"));
+
+            // Add an IDocumentStore singleton, with settings pulled from the RavenSettings.
+            services.AddRavenDbDocStore();
+
+            // Add a scoped IAsyncDocumentSession. For the sync version, use .AddRavenSession() instead.
+            // Note: Your code is responsible for calling .SaveChangesAsync on this. This Sample does so via the RavenSaveChangesAsyncFilter.
+            services.AddRavenDbAsyncSession();
+
+            // Add our RavenDB.Identity provider.
+            var identityBuilder = services.AddRavenDbIdentity<AppUser>();
+
+            // Optional: some default UI for register/login/password reset/etc.
+            identityBuilder.AddDefaultUI(UIFramework.Bootstrap4); 
             
-            // Add RavenDB and identity.
-            services
-                .AddRavenDbAsyncSession(docStore) // Create a RavenDB IAsyncDocumentSession for each request.
-                .AddRavenDbIdentity<AppUser>(); // Use Raven for users and roles.
-
-            // You can change the login path if need be.
-            // services.ConfigureApplicationCookie(options => options.LoginPath = "/my/login/path");
-
-            // Add application services.
-            services.AddTransient<IEmailSender, EmailSender>();
-
-            services.AddMvc();
+            // Finally, instruct Razor Pages to call dbSession.SaveChangesAsync() when an action completes.
+            // For MVC apps, you may instead use a base controller that calls .SaveChangesAsync().
+            services.AddMvc(o => o.Filters.Add<RavenSaveChangesAsyncFilter>())
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,42 +67,25 @@ namespace Sample
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
                 app.UseDatabaseErrorPage();
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
             }
 
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseCookiePolicy();
 
             app.UseAuthentication();
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-            });
-        }
+            app.UseMvc();
 
-        private void CreateDatabaseIfNotExists(IDocumentStore docStore, string databaseName)
-        {
-            try
-            {
-                using (var dbSession = docStore.OpenSession())
-                {
-                    dbSession.Query<AppUser>().Take(0).ToList();
-                }
-            }
-            catch (Raven.Client.Exceptions.Database.DatabaseDoesNotExistException)
-            {
-                docStore.Maintenance.Server.Send(new Raven.Client.ServerWide.Operations.CreateDatabaseOperation(new Raven.Client.ServerWide.DatabaseRecord
-                {
-                    DatabaseName = databaseName
-                }));
-            }
+            // Create our database if it doesn't exist yet.
+            app.ApplicationServices.GetRequiredService<IDocumentStore>().EnsureExists();
         }
     }
 }

@@ -33,6 +33,11 @@ namespace Raven.Identity
         public virtual string SecurityStamp { get; set; }
 
         /// <summary>
+        /// The concurrency stamp.
+        /// </summary>
+        public virtual string ConcurrencyStamp { get; set; }
+
+        /// <summary>
         /// The email of the user.
         /// </summary>
         public virtual string Email { get; set; }
@@ -50,7 +55,7 @@ namespace Raven.Identity
         /// <summary>
         /// Whether the user has confirmed their phone.
         /// </summary>
-        public virtual bool IsPhoneNumberConfirmed { get; set; }
+        public virtual bool PhoneNumberConfirmed { get; set; }
 
         /// <summary>
         /// Number of times sign in failed.
@@ -65,7 +70,7 @@ namespace Raven.Identity
         /// <summary>
         /// When the user lock out is over.
         /// </summary>
-        public virtual DateTimeOffset? LockoutEndDate { get; set; }
+        public virtual DateTimeOffset? LockoutEnd { get; set; }
 
         /// <summary>
         /// Whether 2-factor authentication is enabled.
@@ -78,7 +83,7 @@ namespace Raven.Identity
         public string TwoFactorAuthenticatorKey { get; set; }
 
         /// <summary>
-        /// The roles of the user. To modify the user's roles, use <see cref="UserManager{TUser}.AddToRoleAsync(TUser, string)"/> nad <see cref="UserManager{TUser}.RemoveFromRolesAsync(TUser, IEnumerable{string})"/>.
+        /// The roles of the user. To modify the user's roles, use <see cref="UserManager{TUser}.AddToRoleAsync(TUser, string)"/> and <see cref="UserManager{TUser}.RemoveFromRolesAsync(TUser, IEnumerable{string})"/>.
         /// </summary>
         public virtual IReadOnlyList<string> Roles { get; private set; }
 

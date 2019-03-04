@@ -1,17 +1,16 @@
-﻿using System;
+﻿using Raven.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Raven.Identity;
 
 namespace Sample.Models
 {
-    // Add profile data for application users by adding properties to the AppUser class
-    public class AppUser : IdentityUser
+    public class AppUser : Raven.Identity.IdentityUser
     {
         /// <summary>
-        /// Sample property. Add your own.
+        /// The user's full name.
         /// </summary>
-        public bool IsAyende { get; set; }
+        public string FullName { get; set; }
     }
 }

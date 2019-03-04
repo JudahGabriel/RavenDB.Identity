@@ -523,7 +523,7 @@ namespace Raven.Identity
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
-            return Task.FromResult(user.LockoutEndDate);
+            return Task.FromResult(user.LockoutEnd);
         }
 
         /// <inheritdoc />
@@ -531,7 +531,7 @@ namespace Raven.Identity
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
-            user.LockoutEndDate = lockoutEnd;
+            user.LockoutEnd = lockoutEnd;
             return Task.CompletedTask;
         }
 
@@ -624,7 +624,7 @@ namespace Raven.Identity
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
-            return Task.FromResult(user.IsPhoneNumberConfirmed);
+            return Task.FromResult(user.PhoneNumberConfirmed);
         }
 
         /// <inheritdoc />
@@ -632,7 +632,7 @@ namespace Raven.Identity
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
-            user.IsPhoneNumberConfirmed = confirmed;
+            user.PhoneNumberConfirmed = confirmed;
             return Task.CompletedTask;
         }
 
@@ -739,8 +739,6 @@ namespace Raven.Identity
                 if (_session == null)
                 {
                     _session = getSessionFunc();
-                    // TODO: do we really need this? I don't believe so. Brought over from Raven 3.x - the new 4.0 uses async version only.
-                    //_session.Advanced.DocumentStore.Conventions.RegisterIdConvention<IdentityUser>((dbname, commands, user) => "IdentityUsers/" + user.Id);
                 }
                 return _session;
             }
