@@ -46,7 +46,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-4. In your controller actions, [call .SaveChangesAsync() when you're done making changes](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs). Typically this is done via a RavenController base class for MVC/WebAPI projects or via an action filter. See our sample [RavenSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs).
+4. In your controller actions, [call .SaveChangesAsync() when you're done making changes](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs#L35). Typically this is done via a RavenController base class for MVC/WebAPI projects or via an action filter. See our sample [RavenSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs).
 
 Need help? Checkout the [sample app](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Sample) to see it all in action.
 
