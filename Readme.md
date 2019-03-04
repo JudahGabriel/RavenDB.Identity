@@ -26,7 +26,7 @@ public class AppUser : Raven.Identity.IdentityUser
 },
 ```
 
-3. In Startup.cs, wire it all up:
+3. In [Startup.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Startup.cs), wire it all up:
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
@@ -39,14 +39,14 @@ public void ConfigureServices(IServiceCollection services)
     // Add RavenDB and identity.
     services
         .AddRavenDbDocStore() // Create an IDocumentStore singleton from the RavenSettings.
-        .AddRavenDbAsyncSession() // Create a RavenDB IAsyncDocumentSession for each request. docStore is your IDocumentStore instance. You're responsible for calling .SaveChanges after each request.
+        .AddRavenDbAsyncSession() // Create a RavenDB IAsyncDocumentSession for each request. You're responsible for calling .SaveChanges after each request.
         .AddRavenDbIdentity<AppUser>(); // Use Raven to manage users and roles.
     
     ...
 }
 ```
 
-4. In your controller actions, call .SaveChangesAsync() when you're done making changes. Typically this is done via a RavenController base class for MVC/WebAPI projects or via an action filter. See our Sample [RavenSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs).
+4. In your controller actions, [call .SaveChangesAsync() when you're done making changes](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs). Typically this is done via a RavenController base class for MVC/WebAPI projects or via an action filter. See our sample [RavenSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs).
 
 Need help? Checkout the [sample app](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Sample) to see it all in action.
 
