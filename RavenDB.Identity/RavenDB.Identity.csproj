@@ -29,7 +29,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="RavenDB.Client" Version="4.1.4" />
-    <PackageReference Include="RavenDB.DependencyInjection" Version="2.0.1" />
+    <PackageReference Include="RavenDB.DependencyInjection" Version="2.0.3" />
   </ItemGroup>
 
 </Project>
