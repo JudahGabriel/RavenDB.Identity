@@ -60,7 +60,7 @@ Using an old version of RavenDB.Identity and want to upgrade to the latest? You 
 // This is necessary only if you stored users with a previous version of RavenDB.Identity.
 // Failure to call this method will result in existing users not being able to login.
 // This method can take several minutes if you have thousands of users.
-UserStore<AppUser>.MigrateToV6(docStore)
+UserStore<AppUser>.MigrateToV6(docStore);
 ```
 
 This upgrade step is necessary because we [updated RavenDB.Identity to use RavenDB's cluster-safe compare/exchange](https://github.com/JudahGabriel/RavenDB.Identity/issues/5) to enforce user name/email uniqueness. 
