@@ -19,10 +19,10 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>5.0.1</Version>
+    <Version>6.0.1</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
-    <PackageReleaseNotes>Configuration of doc store before initialization.</PackageReleaseNotes>
+    <PackageReleaseNotes>Compare/exchange to enforce unique emails cluster-wide, storing with email address as the key.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

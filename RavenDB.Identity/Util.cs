@@ -53,9 +53,17 @@ namespace Raven.Identity
             }
         }
 
-        internal static string GetIdentityUserByUserNameId(string userName)
-        {
-            return string.Format("IdentityUserByUserNames/{0}", userName);
-        }
+        //internal static int GetDeterministicHashCode(string input)
+        //{
+        //    unchecked
+        //    {
+        //        int hash = 23;
+        //        foreach (char c in input)
+        //        {
+        //            hash = hash * 31 + c;
+        //        }
+        //        return hash;
+        //    }
+        //}
     }
 }

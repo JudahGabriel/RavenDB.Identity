@@ -164,6 +164,7 @@ namespace Raven.Identity
     /// <summary>
     /// Entity that aides in helping us load users by a well-known name directly from the RavenDB ACID storage engine, bypassing the eventually consistent RavenDB indexes.
     /// </summary>
+    [Obsolete("This has been replaced with RavenDB compare/exchange values which work cluster-wide.")]
     public sealed class IdentityUserByUserName
     {
         /// <summary>

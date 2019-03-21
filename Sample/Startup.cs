@@ -86,6 +86,9 @@ namespace Sample
 
             // Create our database if it doesn't exist yet.
             app.ApplicationServices.GetRequiredService<IDocumentStore>().EnsureExists();
+
+            // Did you store users prior to RavenDB.Identity v6? If so, you need to call MigrateToV6.
+            // Raven.Identity.UserStore<AppUser>.MigrateToV6(app.ApplicationServices.GetRequiredService<IDocumentStore>());
         }
     }
 }
