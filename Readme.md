@@ -2,6 +2,9 @@
 The simple and easy Identity provider for RavenDB and ASP.NET Core. Use Raven to store your users and logins.
 
 ## Instructions ##
+
+***Important:** Upgrading from a previous version of RavenDB.Identity? See <a href="#updating-from-old-version">Updating From Old Version</a> for steps to migrate to the latest RavenDB.Identity.*
+
 1. Add an [AppUser class](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Models/AppUser.cs) that derives from Raven.Identity.IdentityUser:
 ```csharp
 public class AppUser : Raven.Identity.IdentityUser
@@ -48,6 +51,26 @@ public void ConfigureServices(IServiceCollection services)
 
 4. In your controller actions, [call .SaveChangesAsync() when you're done making changes](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs#L35). Typically this is done via a RavenController base class for MVC/WebAPI projects or via an action filter. See our sample [RavenSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs).
 
+## <a id="updating-from-old-version">Updating From Old Version of RavenDB.Identity</a>
+
+Using an old version of RavenDB.Identity and want to upgrade to the latest? You need to call the `MigrateToV6` method:
+
+```csharp
+// Update our existing users to the latest RavenDB.Identity v6.
+// This is necessary only if you stored users with a previous version of RavenDB.Identity.
+// Failure to call this method will result in existing users not being able to login.
+// This method can take several minutes if you have thousands of users.
+UserStore<AppUser>.MigrateToV6(docStore)
+```
+
+This upgrade step is necessary because we [updated RavenDB.Identity to use RavenDB's cluster-safe compare/exchange](https://github.com/JudahGabriel/RavenDB.Identity/issues/5) to enforce user name/email uniqueness. 
+
+Previous versions of RavenDB.Identity had relied on `IdentityUserByUserName` IDs to enforce uniqueness, but this isn't guaranteed to work in a cluster. Calling MigrateToV6 will create compare/exchange values in Raven for each email address, and will remove the now-obsolete IdentityUserByUserNames collection.
+
+## Getting Started and Sample Project
+
 Need help? Checkout the [sample app](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Sample) to see it all in action.
 
-Not using .NET Core? See our [sister project](https://github.com/JudahGabriel/RavenDB.AspNet.Identity) for a RavenDB Identity Provider for the full .NET Framework.
+## Not using .NET Core?
+
+See our [sister project](https://github.com/JudahGabriel/RavenDB.AspNet.Identity) for a RavenDB Identity Provider for the full .NET Framework.
