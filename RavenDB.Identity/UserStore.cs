@@ -192,11 +192,6 @@ namespace Raven.Identity
             ThrowIfNullDisposedCancelled(user, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
-            // Delete the user and save it. We must save it because deleting is a cluster-wide operation.
-            // Only if the deletion succeeds will we remove the cluseter-wide compare/exchange key.
-            this.DbSession.Delete(user);
-            await this.DbSession.SaveChangesAsync();
-            
             // Remove the cluster-wide compare/exchange key.
             var deletionResult = await DeleteUserEmailReservation(user.Email);
             if (!deletionResult.Successful)
@@ -210,6 +205,11 @@ namespace Raven.Identity
                     }
                 });
             }
+
+            // Delete the user and save it. We must save it because deleting is a cluster-wide operation.
+            // Only if the deletion succeeds will we remove the cluseter-wide compare/exchange key.
+            this.DbSession.Delete(user);
+            await this.DbSession.SaveChangesAsync();
 
             return IdentityResult.Success;
         }
@@ -874,7 +874,15 @@ namespace Raven.Identity
         private Task<CompareExchangeResult<string>> DeleteUserEmailReservation(string email)
         {
             var key = GetCompareExchangeKeyFromEmail(email);
-            var deleteEmailOperation = new DeleteCompareExchangeValueOperation<string>(key, 0);
+            var store = DbSession.Advanced.DocumentStore;
+
+            var readResult = store.Operations.Send(new GetCompareExchangeValueOperation<string>(key));
+            if (readResult == null)
+            {
+                return Task.FromResult(new CompareExchangeResult<string>() { Successful = false });
+            }
+
+            var deleteEmailOperation = new DeleteCompareExchangeValueOperation<string>(key, readResult.Index);
             return DbSession.Advanced.DocumentStore.Operations.SendAsync(deleteEmailOperation);
         }
 
