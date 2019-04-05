@@ -51,6 +51,17 @@ public void ConfigureServices(IServiceCollection services)
 
 4. In your controller actions, [call .SaveChangesAsync() when you're done making changes](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs#L35). Typically this is done via a RavenController base class for MVC/WebAPI projects or via an action filter. See our sample [RavenSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs).
 
+## Modifying RavenDB conventions
+
+To modify RavenDB conventions, you can use the `services.AddRavenDbDocStore(options)` overload:
+
+```csharp
+services.AddRavenDbDocStore(options =>
+{
+   options.BeforeInitializeDocStore = docStore => docStore.Conventions.IdentityPartsSeparator = "-";
+})
+```
+
 ## <a id="updating-from-old-version">Updating From Old Version of RavenDB.Identity</a>
 
 Using an old version of RavenDB.Identity and want to upgrade to the latest? You need to call the `MigrateToV6` method:
