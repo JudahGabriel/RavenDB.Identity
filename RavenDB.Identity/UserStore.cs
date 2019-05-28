@@ -803,7 +803,8 @@ namespace Raven.Identity
             using (var dbSession = docStore.OpenSession())
             {
 #pragma warning disable CS0618 // Type or member is obsolete
-                var stream = dbSession.Advanced.Stream<IdentityUserByUserName>("IdentityUserByUserNames/");
+                var collectionName = store.Conventions.FindCollectionName(typeof(IdentityUserByUserName));
+                var stream = dbSession.Advanced.Stream<IdentityUserByUserName>($"{collectionName}/");
 #pragma warning restore CS0618 // Type or member is obsolete
                 while (stream.MoveNext())
                 {
