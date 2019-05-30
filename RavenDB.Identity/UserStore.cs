@@ -805,7 +805,7 @@ namespace Raven.Identity
             using (var dbSession = docStore.OpenSession())
             {
 #pragma warning disable CS0618 // Type or member is obsolete
-                var stream = dbSession.Advanced.Stream<IdentityUserByUserName>("{collectionName}/");
+                var stream = dbSession.Advanced.Stream<IdentityUserByUserName>($"{collectionName}/");
 #pragma warning restore CS0618 // Type or member is obsolete
                 while (stream.MoveNext())
                 {
@@ -834,7 +834,7 @@ namespace Raven.Identity
                 .Operations
                 .Send(new DeleteByQueryOperation(new Client.Documents.Queries.IndexQuery
                 {
-                    Query = "from {collectionName}"
+                    Query = $"from {collectionName}"
                 }));
             operation.WaitForCompletion();
         }
