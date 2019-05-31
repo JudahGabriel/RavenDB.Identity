@@ -798,12 +798,14 @@ namespace Raven.Identity
         /// <returns></returns>
         public static void MigrateToV6(IDocumentStore docStore)
         {
+            var collectionName = docStore.Conventions.FindCollectionName(typeof(IdentityUserByUserName));
+
             // Step 1: find all the old IdentityByUserName objects.
             var emails = new List<(string userId, string email)>(1000);
             using (var dbSession = docStore.OpenSession())
             {
 #pragma warning disable CS0618 // Type or member is obsolete
-                var stream = dbSession.Advanced.Stream<IdentityUserByUserName>("IdentityUserByUserNames/");
+                var stream = dbSession.Advanced.Stream<IdentityUserByUserName>($"{collectionName}/");
 #pragma warning restore CS0618 // Type or member is obsolete
                 while (stream.MoveNext())
                 {
@@ -832,7 +834,7 @@ namespace Raven.Identity
                 .Operations
                 .Send(new DeleteByQueryOperation(new Client.Documents.Queries.IndexQuery
                 {
-                    Query = "from IdentityUserByUserNames"
+                    Query = $"from {collectionName}"
                 }));
             operation.WaitForCompletion();
         }
