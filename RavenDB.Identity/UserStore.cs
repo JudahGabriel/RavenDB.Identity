@@ -798,13 +798,13 @@ namespace Raven.Identity
         /// <returns></returns>
         public static void MigrateToV6(IDocumentStore docStore)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             var collectionName = docStore.Conventions.FindCollectionName(typeof(IdentityUserByUserName));
 
             // Step 1: find all the old IdentityByUserName objects.
             var emails = new List<(string userId, string email)>(1000);
             using (var dbSession = docStore.OpenSession())
             {
-#pragma warning disable CS0618 // Type or member is obsolete
                 var stream = dbSession.Advanced.Stream<IdentityUserByUserName>($"{collectionName}/");
 #pragma warning restore CS0618 // Type or member is obsolete
                 while (stream.MoveNext())
