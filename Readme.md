@@ -5,7 +5,7 @@ The simple and easy Identity provider for RavenDB and ASP.NET Core. Use Raven to
 
 ***Important:** Upgrading from a previous version of RavenDB.Identity? See <a href="#updating-from-old-version">Updating From Old Version</a> for steps to migrate to the latest RavenDB.Identity.*
 
-1. Add an [AppUser class](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Models/AppUser.cs) that derives from Raven.Identity.IdentityUser:
+1. Add an [AppUser class](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Models/AppUser.cs) that derives from Raven.Identity.IdentityUser:
 ```csharp
 public class AppUser : Raven.Identity.IdentityUser
 {
@@ -29,7 +29,7 @@ public class AppUser : Raven.Identity.IdentityUser
 },
 ```
 
-3. In [Startup.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Startup.cs), wire it all up:
+3. In [Startup.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Startup.cs), wire it all up:
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
@@ -49,7 +49,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-4. In your controller actions, [call .SaveChangesAsync() when you're done making changes](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs#L35). Typically this is done via a RavenController base class for MVC/WebAPI projects or via an action filter. See our sample [RavenSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs).
+4. In your controller actions, [call .SaveChangesAsync() when you're done making changes](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs#L35). Typically this is done via a [RavenController base class](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Controllers/RavenController.cs) for MVC/WebAPI projects or via an action filter or a [page filter](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs) for Razor Pages projects.
 
 ## Modifying RavenDB conventions
 
@@ -80,7 +80,7 @@ Previous versions of RavenDB.Identity had relied on `IdentityUserByUserName` IDs
 
 ## Getting Started and Sample Project
 
-Need help? Checkout the [sample app](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Sample) to see it all in action.
+Need help? Checkout the [Razor Pages sample](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Samples/RazorPages) or [MVC sample](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Samples/Mvc) to see it all in action.
 
 ## Not using .NET Core?
 
