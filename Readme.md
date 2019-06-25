@@ -23,7 +23,7 @@ public class AppUser : Raven.Identity.IdentityUser
     "Urls": [
         "http://live-test.ravendb.net"
     ],
-    "DatabaseName": "Raven.Identity.Sample",
+    "DatabaseName": "Raven.Identity.Sample.RazorPages",
     "CertFilePath": "",
     "CertPassword": ""
 },
@@ -49,16 +49,17 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-4. In your controller actions, [call .SaveChangesAsync() when you're done making changes](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs#L35). Typically this is done via a [RavenController base class](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Controllers/RavenController.cs) for MVC/WebAPI projects or via an action filter or a [page filter](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs) for Razor Pages projects.
+4. In your controller actions, [call .SaveChangesAsync() when you're done making changes](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs#L35). Typically this is done via a [RavenController base class](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Controllers/RavenController.cs) for MVC/WebAPI projects or via a [page filter](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs) for Razor Pages projects.
 
 ## Modifying RavenDB conventions
 
-To modify RavenDB conventions, you can use the `services.AddRavenDbDocStore(options)` overload:
+Need to modify RavenDB conventions? You can use the `services.AddRavenDbDocStore(options)` overload:
 
 ```csharp
 services.AddRavenDbDocStore(options =>
 {
-   options.BeforeInitializeDocStore = docStore => docStore.Conventions.IdentityPartsSeparator = "-";
+    // Maybe we want to change the identity parts separator.
+    options.BeforeInitializeDocStore = docStore => docStore.Conventions.IdentityPartsSeparator = "-";
 })
 ```
 
