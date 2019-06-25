@@ -387,8 +387,8 @@ namespace Raven.Identity
         public async Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
-
-            var roleNameLowered = roleName.ToLower();
+            
+            var roleNameLowered = roleName.ToLowerInvariant();
             if (!user.Roles.Contains(roleNameLowered, StringComparer.OrdinalIgnoreCase))
             {
                 user.GetRolesList().Add(roleNameLowered);
@@ -419,7 +419,7 @@ namespace Raven.Identity
 
             user.GetRolesList().RemoveAll(r => string.Equals(r, roleName, StringComparison.OrdinalIgnoreCase));
 
-            var roleId = "IdentityRoles/" + roleName.ToLower();
+            var roleId = RoleStore<IdentityRole>.GetRavenIdFromRoleName(roleName, DbSession.Advanced.DocumentStore);
             var roleOrNull = await DbSession.LoadAsync<IdentityRole>(roleId, cancellationToken);
             if (roleOrNull != null)
             {

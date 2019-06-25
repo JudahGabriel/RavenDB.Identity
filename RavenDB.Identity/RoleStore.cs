@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents.Session;
 using Raven.Client.Exceptions;
+using Raven.Client.Documents;
 
 namespace Raven.Identity
 {
@@ -133,7 +134,9 @@ namespace Raven.Identity
             {
                 throw new ArgumentNullException(nameof(role.Name));
             }
-            await AsyncSession.StoreAsync(role, $"IdentityRoles/{role.Name}");
+
+            var roleId = GetRavenIdFromRoleName(role.Name, AsyncSession.Advanced.DocumentStore);
+            await AsyncSession.StoreAsync(role, roleId);
             await SaveChanges(cancellationToken);
             return IdentityResult.Success;
         }
@@ -269,7 +272,9 @@ namespace Raven.Identity
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            return AsyncSession.LoadAsync<TRole>($"IdentityRoles/{normalizedName.ToLower()}");
+
+            var roleId = GetRavenIdFromRoleName(normalizedName, AsyncSession.Advanced.DocumentStore);
+            return AsyncSession.LoadAsync<TRole>(roleId);
         }
 
         /// <summary>
@@ -286,7 +291,8 @@ namespace Raven.Identity
             {
                 throw new ArgumentNullException(nameof(role));
             }
-            return Task.FromResult(role.Name.ToLower());
+
+            return Task.FromResult(role.Name.ToLowerInvariant());
         }
 
         /// <summary>
@@ -404,5 +410,11 @@ namespace Raven.Identity
         /// <param name="claim">The associated claim.</param>
         /// <returns>The role claim entity.</returns>
         protected abstract TRoleClaim CreateRoleClaim(TRole role, Claim claim);
+
+        internal static string GetRavenIdFromRoleName(string role, IDocumentStore docStore)
+        {
+            var partSeparator = docStore.Conventions.IdentityPartsSeparator;
+            return "IdentityRole" + partSeparator + role;
+        }
     }
 }

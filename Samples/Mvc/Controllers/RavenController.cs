@@ -15,7 +15,7 @@ namespace Sample.Mvc.Controllers
     {
         public RavenController(IAsyncDocumentSession dbSession)
         {
-            this.DbSession = DbSession;
+            this.DbSession = dbSession;
 
             // RavenDB best practice: during save, wait for the indexes to update.
             // This way, Post-Redirect-Get scenarios won't be affected by stale indexes.
