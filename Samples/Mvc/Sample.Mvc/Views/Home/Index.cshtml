@@ -1,0 +1,24 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+    <div class="text-center">
+
+        <h1 class="display-4">Welcome to MVC sample for Raven.Identity</h1>
+        @if (User.Identity.IsAuthenticated)
+        {
+            <p>
+                Hi, @User.Identity.Name. You're currently signed in, and your role is @ViewBag.UserRoles. 😎
+            </p>
+            <p>
+                From here, you can <a href="/account/changeroles">change your role</a>, <a href="/home/adminonly">view an admin-only page</a>, or <a href="/account/signout">sign out</a>.
+            </p>
+            <p>
+                Your user is saved in Raven. <a href="http://live-test.ravendb.net/studio/index.html#databases/documents?collection=AppUsers&database=Raven.Identity.Sample.Mvc">View it</a>.
+            </p>
+        }
+        else
+        {
+            <p>You're not signed in. Please <a href="/account/signin">Sign In</a> or <a href="/account/register">Register</a>.</p>
+        }
+    </div>

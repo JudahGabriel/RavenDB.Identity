@@ -6,12 +6,12 @@
 @inject SignInManager<AppUser> SignInManager
 
 <div class="text-center">
-    <h1 class="display-4">RavenDB Identity Sample</h1>
+    <h1 class="display-4">Welcome to Razor Pages sample for Raven.Identity</h1>
     @if (SignInManager.IsSignedIn(User))
     {
         <p>Hi, @User.Identity.Name. You're currently signed in. 😎</p>
         <p>
-            Your user is saved in Raven. <a href="http://live-test.ravendb.net/studio/index.html#databases/documents?collection=AppUsers&database=Raven.Identity.Sample">View it</a>.
+            Your user is saved in Raven. <a href="http://live-test.ravendb.net/studio/index.html#databases/documents?collection=AppUsers&database=Raven.Identity.Sample.RazorPages">View it</a>.
         </p>
     }
     else

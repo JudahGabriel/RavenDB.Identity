@@ -134,6 +134,11 @@ namespace Raven.Identity
                 user.Id = id;
             }
 
+            if (string.IsNullOrEmpty(user.UserName))
+            {
+                user.UserName = user.Email;
+            }
+
             cancellationToken.ThrowIfCancellationRequested();
 
             // See if the email address is already taken.
@@ -390,7 +395,9 @@ namespace Raven.Identity
             }
 
             // See if we have an IdentityRole with that.
-            var roleId = "IdentityRoles/" + roleNameLowered;
+            var identityUserPrefix = DbSession.Advanced.DocumentStore.Conventions.GetCollectionName(typeof(IdentityRole));
+            var identityPartSeperator = DbSession.Advanced.DocumentStore.Conventions.IdentityPartsSeparator;
+            var roleId = identityUserPrefix + identityPartSeperator + roleNameLowered;
             var existingRoleOrNull = await this.DbSession.LoadAsync<IdentityRole>(roleId, cancellationToken);
             if (existingRoleOrNull == null)
             {

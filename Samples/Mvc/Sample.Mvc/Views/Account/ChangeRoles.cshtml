@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Register";
+}
+
+<h1>Change your roles</h1>
+<p>For testing purposes, you can change your role(s) here to see authorization in action.</p>
+
+<form action="/account/changeroles" method="post">
+    <div class="form-group">
+        <label for="inputRole">Roles:</label>
+        <select class="form-control" id="inputRole" name="Roles" multiple size="2">
+            <option selected="@User.IsInRole(AppUser.ManagerRole)">@AppUser.ManagerRole</option>
+            <option selected="@User.IsInRole(AppUser.AdminRole)">@AppUser.AdminRole</option>
+        </select>
+        <small class="form-text text-muted">
+            Use CTRL to select multiple
+        </small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+

@@ -3,23 +3,23 @@
 This is a Razor Pages sample that shows how to use Raven.Identity.
 
 There are four areas of interest:
- 1. [appsettings.json](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/appsettings.json) - where we configure our connection to Raven.
- 2. [AppUser.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Models/AppUser.cs) - our user class containing any user data like FirstName and LastName.
- 3. [RavenSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs) - where we save changes to Raven after actions finish executing. This makes sense for a Razor Pages project. For an MVC or Web API project, use a RavenController base class instead.
- 4. [Startup.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Startup.cs) - where we wire up everything.
+ 1. [appsettings.json](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/appsettings.json) - where we configure our connection to Raven.
+ 2. [AppUser.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Models/AppUser.cs) - our user class containing any user data like FirstName and LastName.
+ 3. [RavenSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs) - where we save changes to Raven after actions finish executing. This makes sense for a Razor Pages project. For an MVC or Web API project, use a RavenController base class instead.
+ 4. [Startup.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Startup.cs) - where we wire up everything.
 
 More details below.
 
 ## 1. appsettings.json - connection to Raven
 
-Our [appsettings.json file](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/appsettings.json) defines our connection to Raven. This is done using the [RavenDB.DependencyInjection](https://github.com/JudahGabriel/RavenDB.DependencyInjection/) package.
+Our [appsettings.json file](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/appsettings.json) defines our connection to Raven. This is done using the [RavenDB.DependencyInjection](https://github.com/JudahGabriel/RavenDB.DependencyInjection/) package.
 
 ```json
 "RavenSettings": {
 	"Urls": [
 		"http://live-test.ravendb.net"
 	],
-	"DatabaseName": "Raven.Identity.Sample",
+	"DatabaseName": "Raven.Identity.Sample.RazorPages",
 	"CertFilePath": "",
 	"CertPassword": ""
 },
@@ -27,7 +27,7 @@ Our [appsettings.json file](https://github.com/JudahGabriel/RavenDB.Identity/blo
 
 ## 2. AppUser.cs - user class
 
-We create our own [AppUser class](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Models/AppUser.cs) to hold user data:
+We create our own [AppUser class](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Models/AppUser.cs) to hold user data:
 
 ```csharp
 public class AppUser : Raven.Identity.IdentityUser
@@ -45,7 +45,7 @@ While this step isn't strictly necessary -- it's possible to skip AppUser and ju
 
 We need to `.SaveChangesAsync()` for anything to persist in Raven. Where should we do this?
 
-While we could call `.SaveChangesAsync()` in the code-behind of every Razor page, that is tedious and error prone. Instead, we create a Razor action filter to save changes, [RaveSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Filters/RavenSaveChangesAsyncFilter.cs):
+While we could call `.SaveChangesAsync()` in the code-behind of every Razor page, that is tedious and error prone. Instead, we create a Razor action filter to save changes, [RaveSaveChangesAsyncFilter.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs):
 
 ```csharp
 /// <summary>
@@ -82,7 +82,7 @@ For MVC and Web API projects can use an action filter, or may alternately use a 
 
 ## 4. Start.cs, wiring it all together
 
-In [Startup.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sample/Startup.cs), we wire up all of the above steps:
+In [Startup.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Startup.cs), we wire up all of the above steps:
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)

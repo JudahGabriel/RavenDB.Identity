@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Register";
+}
+
+<h1>Register</h1>
+<p>(Already registered? Please <a href="/account/register">Sign in</a>.)</p>
+
+<form action="/account/register" method="post">
+    <div class="form-group">
+        <label for="inputEmail">Email address</label>
+        <input type="email" class="form-control" id="inputEmail" name="Email" aria-describedby="emailHelp" placeholder="you@foo.com">
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+        <label for="inputPassword">Password</label>
+        <input type="password" class="form-control" id="inputPassword" name="Password" placeholder="Password">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
+
