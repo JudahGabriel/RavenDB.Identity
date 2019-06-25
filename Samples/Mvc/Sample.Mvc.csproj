@@ -15,7 +15,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\RavenDB.Identity\RavenDB.Identity.csproj" />
+    <ProjectReference Include="..\..\RavenDB.Identity\RavenDB.Identity.csproj" />
   </ItemGroup>
 
 </Project>
