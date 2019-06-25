@@ -1,5 +1,5 @@
 ﻿# <img src="https://github.com/JudahGabriel/RavenDB.Identity/blob/master/RavenDB.Identity/nuget-icon.png?raw=true" width="50px" height="50px" /> RavenDB.Identity
-The simple and easy Identity provider for RavenDB and ASP.NET Core. Use Raven to store your users and logins.
+The simple and easy Identity provider for RavenDB and ASP.NET Core. Use Raven to store your users and roles.
 
 ## Instructions ##
 
