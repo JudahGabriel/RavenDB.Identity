@@ -108,27 +108,12 @@ In [Startup.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sam
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-    // Grab our RavenSettings object from appsettings.json.
-    services.Configure<RavenSettings>(Configuration.GetSection("RavenSettings"));
-
     ...
 
-	// Add an IDocumentStore singleton, with settings pulled from the RavenSettings.
-    services.AddRavenDbDocStore();
-
-    // Add a scoped IAsyncDocumentSession. For the sync version, use .AddRavenSession() instead.
-    // Note: Your code is responsible for calling .SaveChangesAsync() on this. This Sample does so via the RavenSaveChangesAsyncFilter.
-    services.AddRavenDbAsyncSession();
-
-    // Use Raven for our users
-    services.AddRavenDbIdentity<AppUser>();
-	
-    ...
-
-    // Call .SaveChangesAsync() after each action.
     services
-	    .AddMvc(o => o.Filters.Add<RavenSaveChangesAsyncFilter>())
-	    .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+        .AddRavenDbDocStore() // Create our IDocumentStore singleton using the database settings in appsettings.json
+        .AddRavenDbAsyncSession() // Create an Raven IAsyncDocumentSession for every request.
+        .AddRavenDbIdentity<AppUser>(); // Let Raven store users and roles.
 }
 ```
 
