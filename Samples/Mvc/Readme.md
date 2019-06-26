@@ -50,26 +50,26 @@ While we could call `.SaveChangesAsync()` in every controller action, that is te
 
 ```csharp
 /// <summary>
-    /// A controller that calls DbSession.SaveChangesAsync() when an action finishes executing successfully.
-    /// </summary>
-    public class RavenController : Controller
+/// A controller that calls DbSession.SaveChangesAsync() when an action finishes executing successfully.
+/// </summary>
+public class RavenController : Controller
+{
+    public RavenController(IAsyncDocumentSession dbSession)
     {
-        public RavenController(IAsyncDocumentSession dbSession)
-        {
-            this.DbSession = DbSession;
-        }
+        this.DbSession = DbSession;
+    }
 
-        public IAsyncDocumentSession DbSession { get; private set; }
+    public IAsyncDocumentSession DbSession { get; private set; }
 
-        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    {
+        var executedContext = await next.Invoke();
+        if (executedContext.Exception == null)
         {
-            var executedContext = await next.Invoke();
-            if (executedContext.Exception == null)
-            {
-                await DbSession.SaveChangesAsync();   
-            }
+            await DbSession.SaveChangesAsync();   
         }
     }
+}
 ```
 
 ## 4. AccountController
