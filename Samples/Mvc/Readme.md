@@ -26,7 +26,7 @@ Our [appsettings.json file](https://github.com/JudahGabriel/RavenDB.Identity/blo
 },
 ```
 
-## 2. AppUser.cs - user class
+## 2. [AppUser.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Models/AppUser.cs)
 
 We create our own [AppUser class](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Models/AppUser.cs) to hold user data:
 
@@ -42,7 +42,7 @@ public class AppUser : Raven.Identity.IdentityUser
 
 While this step isn't strictly necessary -- it's possible to skip AppUser and just use the built-in `Raven.Identity.IdentityUser` -- we recommend creating an AppUser class so you can extend your users with app-specific data.
 
-## 3. RavenController
+## 3. [RavenController.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Controllers/RavenController.cs)
 
 We need to `.SaveChangesAsync()` for anything to persist in Raven. Where should we do this?
 
@@ -72,7 +72,7 @@ public class RavenController : Controller
 }
 ```
 
-## 4. AccountController
+## 4. [AccountController.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Controllers/AccountController.cs)
 
 In [AccountController.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Controllers/AccountController.cs), we inherit from RavenController, then use the standard AspNetCore identity APIs to do registration, sign in, role change, and more:
 
@@ -86,10 +86,10 @@ public class AccountController : RavenController
         var appUser = new AppUser
         {
             Email = model.Email,
-			UserName = model.Email
+            UserName = model.Email
         };
         var createUserResult = await this.userManager.CreateAsync(appUser, model.Password);
-		...
+        ...
 	}
 }
 ```
@@ -105,7 +105,7 @@ public async Task<IActionResult> SignIn(SignInModel model)
         return RedirectToAction("Index", "Home");
     }
 
-	...
+    ...
 }
 ```
 
