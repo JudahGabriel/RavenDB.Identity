@@ -74,16 +74,24 @@ public class RavenController : Controller
 
 ## 4. AccountController
 
-In [AccountController.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Controllers/AccountController.cs), we use the standard AspNetCore identity APIs to do registration, sign in, role change, and more:
+In [AccountController.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Controllers/AccountController.cs), we inherit from RavenController, then use the standard AspNetCore identity APIs to do registration, sign in, role change, and more:
 
 ```csharp
-// Register a new user.
-var appUser = new AppUser
+public class AccountController : RavenController 
 {
-    Email = model.Email
-};
-var password = "SuperSecret613$$"
-var createUserResult = await this.userManager.CreateAsync(appUser, password);
+    [HttpPost]
+    public async Task<IActionResult> Register(RegisterModel model)
+	{
+        // Register a new user.
+        var appUser = new AppUser
+        {
+            Email = model.Email,
+			UserName = model.Email
+        };
+        var createUserResult = await this.userManager.CreateAsync(appUser, model.Password);
+		...
+	}
+}
 ```
 
 Likewise for sign-in:
