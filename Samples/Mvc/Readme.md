@@ -2,7 +2,7 @@
 
 This is an AspNetCore MVC sample that shows how to use Raven.Identity.
 
-There are four areas of interest:
+There are five areas of interest:
  1. [appsettings.json](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/appsettings.json) - where we configure our connection to Raven.
  2. [AppUser.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Models/AppUser.cs) - our user class containing any user data like FirstName and LastName.
  3. [RavenController.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Controllers/RavenController.cs) - where we save changes to Raven after actions finish executing.
@@ -108,10 +108,10 @@ In [Startup.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Sam
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-	// Grab our RavenSettings object from appsettings.json.
+    // Grab our RavenSettings object from appsettings.json.
     services.Configure<RavenSettings>(Configuration.GetSection("RavenSettings"));
 
-	...
+    ...
 
 	// Add an IDocumentStore singleton, with settings pulled from the RavenSettings.
     services.AddRavenDbDocStore();
@@ -120,15 +120,15 @@ public void ConfigureServices(IServiceCollection services)
     // Note: Your code is responsible for calling .SaveChangesAsync() on this. This Sample does so via the RavenSaveChangesAsyncFilter.
     services.AddRavenDbAsyncSession();
 
-	// Use Raven for our users
-	services.AddRavenDbIdentity<AppUser>();
+    // Use Raven for our users
+    services.AddRavenDbIdentity<AppUser>();
 	
-	...
+    ...
 
-	// Call .SaveChangesAsync() after each action.
-	services
-		.AddMvc(o => o.Filters.Add<RavenSaveChangesAsyncFilter>())
-		.SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+    // Call .SaveChangesAsync() after each action.
+    services
+	    .AddMvc(o => o.Filters.Add<RavenSaveChangesAsyncFilter>())
+	    .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 }
 ```
 
@@ -138,6 +138,6 @@ public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 {
     ...
     app.UseAuthentication();
-	...
+    ...
 }
 ```
