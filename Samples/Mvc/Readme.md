@@ -17,12 +17,12 @@ Our [appsettings.json file](https://github.com/JudahGabriel/RavenDB.Identity/blo
 
 ```json
 "RavenSettings": {
-	"Urls": [
-		"http://live-test.ravendb.net"
-	],
-	"DatabaseName": "Raven.Identity.Sample.Mvc",
-	"CertFilePath": "",
-	"CertPassword": ""
+    "Urls": [
+        "http://live-test.ravendb.net"
+    ],
+    "DatabaseName": "Raven.Identity.Sample.Mvc",
+    "CertFilePath": "",
+    "CertPassword": ""
 },
 ```
 
@@ -81,7 +81,7 @@ public class AccountController : RavenController
 {
     [HttpPost]
     public async Task<IActionResult> Register(RegisterModel model)
-	{
+    {
         // Register a new user.
         var appUser = new AppUser
         {
@@ -90,7 +90,7 @@ public class AccountController : RavenController
         };
         var createUserResult = await this.userManager.CreateAsync(appUser, model.Password);
         ...
-	}
+    }
 }
 ```
 
