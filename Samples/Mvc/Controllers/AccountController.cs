@@ -66,8 +66,8 @@ namespace Sample.Mvc.Controllers
             // Create the user.
             var appUser = new AppUser
             {
-                UserName = model.Email,
-                Email = model.Email
+                Email = model.Email,
+                UserName = model.Email
             };
             var createUserResult = await this.userManager.CreateAsync(appUser, model.Password);
             if (!createUserResult.Succeeded)

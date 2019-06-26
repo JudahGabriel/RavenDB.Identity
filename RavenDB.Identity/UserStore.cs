@@ -386,17 +386,12 @@ namespace Raven.Identity
         /// <inheritdoc />
         public async Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-            
-            var roleNameLowered = roleName.ToLowerInvariant();
-            if (!user.Roles.Contains(roleNameLowered, StringComparer.OrdinalIgnoreCase))
-            {
-                user.GetRolesList().Add(roleNameLowered);
-            }
+            ThrowIfNullDisposedCancelled(user, cancellationToken);            
 
-            // See if we have an IdentityRole with that.
+            // See if we have an IdentityRole with that name.
             var identityUserPrefix = DbSession.Advanced.DocumentStore.Conventions.GetCollectionName(typeof(IdentityRole));
             var identityPartSeperator = DbSession.Advanced.DocumentStore.Conventions.IdentityPartsSeparator;
+            var roleNameLowered = roleName.ToLowerInvariant();
             var roleId = identityUserPrefix + identityPartSeperator + roleNameLowered;
             var existingRoleOrNull = await this.DbSession.LoadAsync<IdentityRole>(roleId, cancellationToken);
             if (existingRoleOrNull == null)
@@ -406,7 +401,14 @@ namespace Raven.Identity
                 await this.DbSession.StoreAsync(existingRoleOrNull, roleId, cancellationToken);
             }
 
-            if (!existingRoleOrNull.Users.Contains(user.Id, StringComparer.OrdinalIgnoreCase))
+            // Use the real name (not normalized/uppered/lowered) of the role, as specified by the user.
+            var roleRealName = existingRoleOrNull.Name;
+            if (!user.Roles.Contains(roleRealName, StringComparer.InvariantCultureIgnoreCase))
+            {
+                user.GetRolesList().Add(roleRealName);
+            }
+
+            if (!existingRoleOrNull.Users.Contains(user.Id, StringComparer.InvariantCultureIgnoreCase))
             {
                 existingRoleOrNull.Users.Add(user.Id);
             }
@@ -417,7 +419,7 @@ namespace Raven.Identity
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
-            user.GetRolesList().RemoveAll(r => string.Equals(r, roleName, StringComparison.OrdinalIgnoreCase));
+            user.GetRolesList().RemoveAll(r => string.Equals(r, roleName, StringComparison.InvariantCultureIgnoreCase));
 
             var roleId = RoleStore<IdentityRole>.GetRavenIdFromRoleName(roleName, DbSession.Advanced.DocumentStore);
             var roleOrNull = await DbSession.LoadAsync<IdentityRole>(roleId, cancellationToken);
@@ -443,7 +445,7 @@ namespace Raven.Identity
                 throw new ArgumentNullException(nameof(roleName));
             }
 
-            return Task.FromResult(user.Roles.Contains(roleName, StringComparer.OrdinalIgnoreCase));
+            return Task.FromResult(user.Roles.Contains(roleName, StringComparer.InvariantCultureIgnoreCase));
         }
 
         /// <inheritdoc />

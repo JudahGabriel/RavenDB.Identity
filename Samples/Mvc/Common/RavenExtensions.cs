@@ -1,4 +1,5 @@
-﻿using Raven.Client.Documents;
+﻿using Microsoft.AspNetCore.Identity;
+using Raven.Client.Documents;
 using Sample.Mvc.Models;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,31 @@ namespace Sample.Mvc.Common
             }
 
             return store;
+        }
+
+        public static IDocumentStore EnsureRolesExist(this IDocumentStore docStore, List<string> roleNames)
+        {
+            using (var dbSession = docStore.OpenSession())
+            {
+                var roleIds = roleNames.Select(r => "IdentityRoles/" + r);
+                var roles = dbSession.Load<Raven.Identity.IdentityRole>(roleIds);
+                foreach (var idRolePair in roles)
+                {
+                    if (idRolePair.Value == null)
+                    {
+                        var id = idRolePair.Key;
+                        var roleName = id.Replace("IdentityRoles/", string.Empty);
+                        dbSession.Store(new Raven.Identity.IdentityRole(roleName), id);
+                    }
+                }
+
+                if (roles.Any(i => i.Value == null))
+                {
+                    dbSession.SaveChanges();
+                }
+            }
+
+            return docStore;
         }
     }
 }

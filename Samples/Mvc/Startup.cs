@@ -65,8 +65,11 @@ namespace Sample.Mvc
             app.UseCookiePolicy();
 
             // Create the database if it doesn't exist.
-            app.ApplicationServices.GetRequiredService<IDocumentStore>().EnsureExists();
-
+            // Also, create our roles if they don't exist. Needed because we're doing some role-based auth in this demo.
+            var docStore = app.ApplicationServices.GetRequiredService<IDocumentStore>();
+            docStore.EnsureExists();
+            docStore.EnsureRolesExist(new List<string> { AppUser.AdminRole, AppUser.ManagerRole });
+            
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

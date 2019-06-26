@@ -413,8 +413,9 @@ namespace Raven.Identity
 
         internal static string GetRavenIdFromRoleName(string role, IDocumentStore docStore)
         {
+            var roleCollection = docStore.Conventions.GetCollectionName(typeof(TRole));
             var partSeparator = docStore.Conventions.IdentityPartsSeparator;
-            return "IdentityRole" + partSeparator + role;
+            return roleCollection + partSeparator + role;
         }
     }
 }
