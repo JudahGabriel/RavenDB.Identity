@@ -33,7 +33,7 @@ namespace Raven.Identity
         IUserTwoFactorRecoveryCodeStore<TUser>,
         IQueryableUserStore<TUser>
         where TUser : IdentityUser
-		where TRole : IdentityRole
+		where TRole : IdentityRole, new()
     {
         private bool _disposed;
         private readonly Func<IAsyncDocumentSession> getSessionFunc;
@@ -401,7 +401,8 @@ namespace Raven.Identity
             if (existingRoleOrNull == null)
             {
                 ThrowIfDisposedOrCancelled(cancellationToken);
-                existingRoleOrNull = new IdentityRole(roleNameLowered);
+                existingRoleOrNull = new TRole();
+                existingRoleOrNull.Name = roleNameLowered;
                 await this.DbSession.StoreAsync(existingRoleOrNull, roleId, cancellationToken);
             }
 

@@ -19,10 +19,10 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>6.0.6</Version>
+    <Version>6.1</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
-    <PackageReleaseNotes>Fixed role.Name and user.Roles case sensitivity, which had been causing authorization issues.</PackageReleaseNotes>
+    <PackageReleaseNotes>Custom IdentityRole types are stored using their type name in the ID. UserStore can now handle custom IdentityRole types.</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 

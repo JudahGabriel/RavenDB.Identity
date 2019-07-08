@@ -10,12 +10,16 @@ namespace Raven.Identity
     public class IdentityRole : IdentityRole<IdentityRoleClaim>
     {
         /// <summary>
+        /// Creates a new IdentityRole.
+        /// </summary>
+        public IdentityRole()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="IdentityRole"/>.
         /// </summary>
         /// <param name="roleName">The role name.</param>
-        /// <remarks>
-        /// The Id property is initialized to from a new GUID string value.
-        /// </remarks>
         public IdentityRole(string roleName)
         {
             Name = roleName;
@@ -57,7 +61,6 @@ namespace Raven.Identity
 
         /// <summary>
         /// Gets or sets the primary key for this role.
-        /// Format: IdentityRoles/{roleName}
         /// </summary>
         public virtual string Id { get; set; }
 

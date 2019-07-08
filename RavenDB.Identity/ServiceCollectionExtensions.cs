@@ -35,7 +35,7 @@ namespace Raven.Identity
 		/// <returns>The identity builder.</returns>
 		public static IdentityBuilder AddRavenDbIdentity<TUser, TRole>(this IServiceCollection services, Action<IdentityOptions> setupAction = null)
 			where TUser : IdentityUser
-			where TRole : IdentityRole
+			where TRole : IdentityRole, new()
 		{
             // Add the AspNet identity system to work with our RavenDB identity objects.
             IdentityBuilder identityBuilder;
