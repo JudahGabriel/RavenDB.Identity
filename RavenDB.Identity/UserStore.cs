@@ -16,7 +16,8 @@ namespace Raven.Identity
     /// UserStore for entities in a RavenDB database.
     /// </summary>
     /// <typeparam name="TUser"></typeparam>
-    public class UserStore<TUser> : 
+	/// <typeparam name="TRole"></typeparam>
+    public class UserStore<TUser, TRole> : 
         IUserStore<TUser>, 
         IUserLoginStore<TUser>, 
         IUserClaimStore<TUser>, 
@@ -32,6 +33,7 @@ namespace Raven.Identity
         IUserTwoFactorRecoveryCodeStore<TUser>,
         IQueryableUserStore<TUser>
         where TUser : IdentityUser
+		where TRole : IdentityRole
     {
         private bool _disposed;
         private readonly Func<IAsyncDocumentSession> getSessionFunc;
@@ -129,8 +131,9 @@ namespace Raven.Identity
             {
                 var conventions = DbSession.Advanced.DocumentStore.Conventions;
                 var entityName = conventions.GetCollectionName(typeof(TUser));
+				var prefix = conventions.TransformTypeCollectionNameToDocumentIdPrefix(entityName);
                 var separator = conventions.IdentityPartsSeparator;
-                var id = $"{entityName}{separator}{user.Email}";
+                var id = $"{prefix}{separator}{user.Email}";
                 user.Id = id;
             }
 
@@ -389,10 +392,11 @@ namespace Raven.Identity
             ThrowIfNullDisposedCancelled(user, cancellationToken);            
 
             // See if we have an IdentityRole with that name.
-            var identityUserPrefix = DbSession.Advanced.DocumentStore.Conventions.GetCollectionName(typeof(IdentityRole));
+            var identityUserCollection = DbSession.Advanced.DocumentStore.Conventions.GetCollectionName(typeof(TRole));
+			var prefix = DbSession.Advanced.DocumentStore.Conventions.TransformTypeCollectionNameToDocumentIdPrefix(identityUserCollection);
             var identityPartSeperator = DbSession.Advanced.DocumentStore.Conventions.IdentityPartsSeparator;
             var roleNameLowered = roleName.ToLowerInvariant();
-            var roleId = identityUserPrefix + identityPartSeperator + roleNameLowered;
+            var roleId = prefix + identityPartSeperator + roleNameLowered;
             var existingRoleOrNull = await this.DbSession.LoadAsync<IdentityRole>(roleId, cancellationToken);
             if (existingRoleOrNull == null)
             {
@@ -421,7 +425,7 @@ namespace Raven.Identity
 
             user.GetRolesList().RemoveAll(r => string.Equals(r, roleName, StringComparison.InvariantCultureIgnoreCase));
 
-            var roleId = RoleStore<IdentityRole>.GetRavenIdFromRoleName(roleName, DbSession.Advanced.DocumentStore);
+            var roleId = RoleStore<TRole>.GetRavenIdFromRoleName(roleName, DbSession.Advanced.DocumentStore);
             var roleOrNull = await DbSession.LoadAsync<IdentityRole>(roleId, cancellationToken);
             if (roleOrNull != null)
             {
