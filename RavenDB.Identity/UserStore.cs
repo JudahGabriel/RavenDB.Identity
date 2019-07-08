@@ -129,8 +129,9 @@ namespace Raven.Identity
             {
                 var conventions = DbSession.Advanced.DocumentStore.Conventions;
                 var entityName = conventions.GetCollectionName(typeof(TUser));
+				var prefix = conventions.TransformTypeCollectionNameToDocumentIdPrefix(entityName);
                 var separator = conventions.IdentityPartsSeparator;
-                var id = $"{entityName}{separator}{user.Email}";
+                var id = $"{prefix}{separator}{user.Email}";
                 user.Id = id;
             }
 
@@ -389,10 +390,11 @@ namespace Raven.Identity
             ThrowIfNullDisposedCancelled(user, cancellationToken);            
 
             // See if we have an IdentityRole with that name.
-            var identityUserPrefix = DbSession.Advanced.DocumentStore.Conventions.GetCollectionName(typeof(IdentityRole));
+            var identityUserCollection = DbSession.Advanced.DocumentStore.Conventions.GetCollectionName(typeof(IdentityRole));
+			var prefix = DbSession.Advanced.DocumentStore.Conventions.TransformTypeCollectionNameToDocumentIdPrefix(identityUserCollection);
             var identityPartSeperator = DbSession.Advanced.DocumentStore.Conventions.IdentityPartsSeparator;
             var roleNameLowered = roleName.ToLowerInvariant();
-            var roleId = identityUserPrefix + identityPartSeperator + roleNameLowered;
+            var roleId = prefix + identityPartSeperator + roleNameLowered;
             var existingRoleOrNull = await this.DbSession.LoadAsync<IdentityRole>(roleId, cancellationToken);
             if (existingRoleOrNull == null)
             {
