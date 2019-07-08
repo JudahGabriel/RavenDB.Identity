@@ -50,7 +50,7 @@ namespace Raven.Identity
 					.AddDefaultTokenProviders();
 			}
 
-			services.AddScoped<Microsoft.AspNetCore.Identity.IUserStore<TUser>, UserStore<TUser>>();
+			services.AddScoped<Microsoft.AspNetCore.Identity.IUserStore<TUser>, UserStore<TUser, TRole>>();
 			services.AddScoped<Microsoft.AspNetCore.Identity.IRoleStore<TRole>, RoleStore<TRole>>();
 
 			return identityBuilder;
