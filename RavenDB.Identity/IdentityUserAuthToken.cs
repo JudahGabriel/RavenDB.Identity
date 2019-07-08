@@ -49,9 +49,10 @@ namespace Raven.Identity
             var vals = new[] { userId, loginProvider, name }
                 .Select(v => v ?? "[null]");
             var collection = db.Conventions.GetCollectionName(typeof(IdentityUserAuthToken));
+			var prefix = db.Conventions.TransformTypeCollectionNameToDocumentIdPrefix(collection);
             var separator = db.Conventions.IdentityPartsSeparator;
             var valsHash = CalculateHash(string.Join("-", vals));
-            return collection + separator + valsHash.ToString();
+            return prefix + separator + valsHash.ToString();
         }
 
         private static int CalculateHash(string input)
