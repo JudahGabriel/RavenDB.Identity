@@ -20,7 +20,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.RazorPages", "Samples\RazorPages\Sample.RazorPages.csproj", "{0C8F67DC-B6B3-4D8C-9E33-BBB47F858BE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Mvc", "Samples\Mvc\Sample.Mvc.csproj", "{8AA88A38-C74A-4F0D-9853-EFA0D78F0E63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Mvc", "Samples\Mvc\Sample.Mvc.csproj", "{8AA88A38-C74A-4F0D-9853-EFA0D78F0E63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample3.Mvc", "Samples\Sample3.Mvc\Sample3.Mvc.csproj", "{0F6CA4E9-D251-4FA1-B3DD-2949BE454510}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample3.RazorPages", "Samples\Sample3.RazorPages\Sample3.RazorPages.csproj", "{95B02F17-B0F2-4A01-8EBB-CA04508727AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,6 +44,14 @@ Global
 		{8AA88A38-C74A-4F0D-9853-EFA0D78F0E63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8AA88A38-C74A-4F0D-9853-EFA0D78F0E63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8AA88A38-C74A-4F0D-9853-EFA0D78F0E63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F6CA4E9-D251-4FA1-B3DD-2949BE454510}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F6CA4E9-D251-4FA1-B3DD-2949BE454510}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F6CA4E9-D251-4FA1-B3DD-2949BE454510}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F6CA4E9-D251-4FA1-B3DD-2949BE454510}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95B02F17-B0F2-4A01-8EBB-CA04508727AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95B02F17-B0F2-4A01-8EBB-CA04508727AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95B02F17-B0F2-4A01-8EBB-CA04508727AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95B02F17-B0F2-4A01-8EBB-CA04508727AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
