@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>The simple and easy RavenDB Identity provider for ASP.NET Core. Use Raven to store your users and logins. As simple as services.AddRavenDbIdentity&lt;AppUser&gt;();</Description>
     <Authors>Judah Gabriel Himango</Authors>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>RavenDB.Identity</AssemblyName>
     <Title>RavenDB Identity for ASP.NET Core</Title>
@@ -19,19 +19,30 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>6.1</Version>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <Version>6.2</Version>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
     <PackageReleaseNotes>Custom IdentityRole types are stored using their type name in the ID. UserStore can now handle custom IdentityRole types.</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="RavenDB.DependencyInjection" Version="3.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="RavenDB.Client" Version="4.2.0" />
-    <PackageReference Include="RavenDB.DependencyInjection" Version="3.0.0" />
   </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="3.0.0" />
+    <PackageReference Include="RavenDB.Client" Version="4.2.3" />
+    <PackageReference Include="RavenDB.DependencyInjection" Version="4.0.0" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <None Include="..\LICENSE.md">

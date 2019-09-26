@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Operations.CompareExchange;
@@ -187,11 +187,27 @@ namespace Raven.Identity
         }
 
         /// <inheritdoc />
-        public Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
-            
-            return Task.FromResult(IdentityResult.Success);
+#if NETCOREAPP3_0
+            // In theory, the user object has already been retrieved by the database,
+            // so we don't need to store it again here
+            // await DbSession.StoreAsync(user);
+
+            try
+            {
+                await DbSession.SaveChangesAsync(cancellationToken);
+                return IdentityResult.Success;
+            }
+            catch (Exception)
+            {
+                return IdentityResult.Failed();
+            }
+#elif NETSTANDARD2_0
+            return IdentityResult.Success;
+#endif
+
         }
 
         /// <inheritdoc />
