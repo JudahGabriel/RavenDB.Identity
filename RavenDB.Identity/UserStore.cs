@@ -190,24 +190,7 @@ namespace Raven.Identity
         public async Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
-#if NETCOREAPP3_0
-            // In theory, the user object has already been retrieved by the database,
-            // so we don't need to store it again here
-            // await DbSession.StoreAsync(user);
-
-            try
-            {
-                await DbSession.SaveChangesAsync(cancellationToken);
-                return IdentityResult.Success;
-            }
-            catch (Exception)
-            {
-                return IdentityResult.Failed();
-            }
-#elif NETSTANDARD2_0
             return IdentityResult.Success;
-#endif
-
         }
 
         /// <inheritdoc />
