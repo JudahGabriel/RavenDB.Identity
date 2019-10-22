@@ -16,6 +16,7 @@ using Raven.Client.Documents;
 using Raven.DependencyInjection;
 using Raven.Identity;
 using Sample3.RazorPages.Common;
+using Sample3.RazorPages.Filters;
 using Sample3.RazorPages.Models;
 
 namespace Sample3.RazorPages
@@ -40,6 +41,7 @@ namespace Sample3.RazorPages
                 .AddDefaultUI();
 
             services.AddRazorPages();
+            services.AddMvc(options => options.Filters.Add<RavenSaveChangesAsyncFilter>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
