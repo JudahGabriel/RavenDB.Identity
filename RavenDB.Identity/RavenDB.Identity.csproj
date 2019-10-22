@@ -40,7 +40,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="3.0.0" />
     <PackageReference Include="RavenDB.Client" Version="4.2.3" />
-    <PackageReference Include="RavenDB.DependencyInjection" Version="4.0.0" />
   </ItemGroup>
 
 
