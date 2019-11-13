@@ -10,7 +10,7 @@ namespace Raven.Identity
     /// <summary>
     /// Extends the <see cref="IServiceCollection"/> so that RavenDB services can be registered through it.
     /// </summary>
-    public static class ServiceCollectionExtensions
+    public static class IdentityBuilderExtensions
     {
         /// <summary>
         /// Registers a RavenDB as the user store.
