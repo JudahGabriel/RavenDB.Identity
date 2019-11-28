@@ -12,19 +12,20 @@
     <PackageProjectUrl>https://github.com/JudahGabriel/RavenDB.Identity</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/JudahGabriel/RavenDB.Identity</RepositoryUrl>
-    <ReleaseNotes>Added support for Two Factor auth.</ReleaseNotes>
+    <ReleaseNotes>Restored NuGet icon</ReleaseNotes>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageIconUrl>nuget-icon.png</PackageIconUrl>
+    <PackageIcon>nuget-icon.png</PackageIcon>
+    <PackageIconUrl>https://github.com/JudahGabriel/RavenDB.Identity/blob/master/RavenDB.Identity/nuget-icon.png?raw=true</PackageIconUrl>
     <copyright>Copyright 2019 BitShuva</copyright>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>6.2.0</Version>
+    <Version>6.2.0.1</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
-    <PackageReleaseNotes>Updated to netstandard2.1 (supporting .NET Core 3).</PackageReleaseNotes>
     <PackageLicenseFile></PackageLicenseFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReleaseNotes>Restored NuGet icon</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,7 +33,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0" />
     <PackageReference Include="RavenDB.Client" Version="4.2.4" />
     <PackageReference Include="RavenDB.DependencyInjection" Version="3.1.0" />
-    <None Include="nuget-icon.png" Pack="true" PackagePath=""/>
+    <None Include="nuget-icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
