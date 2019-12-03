@@ -20,12 +20,12 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>6.2.0.1</Version>
+    <Version>6.2.0.2</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
     <PackageLicenseFile></PackageLicenseFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes>Restored NuGet icon</PackageReleaseNotes>
+    <PackageReleaseNotes>UpdateAsync works when changing user name.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
