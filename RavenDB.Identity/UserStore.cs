@@ -150,7 +150,7 @@ namespace Raven.Identity
             //
             // Try to reserve a new user email 
             // Note: This operation takes place outside of the session transaction it is a cluster-wide reservation.
-            var compareExchangeKey = GetCompareExchangeKeyFromEmail(user.Email);
+            var compareExchangeKey = GetCompareExchangeKeyFromEmailOrUserName(user.Email);
             var reserveEmailOperation = new PutCompareExchangeValueOperation<string>(compareExchangeKey, user.Id, 0);
             var reserveEmailResult = await DbSession.Advanced.DocumentStore.Operations.SendAsync(reserveEmailOperation);
             if (!reserveEmailResult.Successful)
@@ -179,7 +179,7 @@ namespace Raven.Identity
             {
                 // The compare/exchange email reservation is cluster-wide, outside of the session scope. 
                 // We need to manually roll it back.
-                await this.DeleteUserEmailReservation(user.Email);
+                await this.DeleteUserKeyReservation(user.Email);
                 throw;
             }
             
@@ -187,11 +187,83 @@ namespace Raven.Identity
         }
 
         /// <inheritdoc />
-        public Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
         {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-            
-            return Task.FromResult(IdentityResult.Success);
+            // Make sure we have a valid user name.
+            if (string.IsNullOrWhiteSpace(user.UserName))
+            {
+                throw new ArgumentException("The user's user name can't be null or empty.", nameof(user));
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Clear session because oldUSer would not be loaded from database because it has the same id as user
+            DbSession.Advanced.Clear();
+
+            // We must delete the old ExchangeCompareKey if the user name hast changed
+            // Therefore we get the unchanged user from database and compare the old username with the current username
+
+            var oldUser = await DbSession.LoadAsync<TUser>(user.Id, cancellationToken);
+            if (user.UserName != oldUser.UserName)
+            {
+                // See if the user name is already taken.
+                // We do this using Raven's compare/exchange functionality, which works cluster-wide.
+                // https://ravendb.net/docs/article-page/4.1/csharp/client-api/operations/compare-exchange/overview#creating-a-key
+                //
+                // Try to reserve a new user name 
+                // Note: This operation takes place outside of the session transaction it is a cluster-wide reservation.
+                var compareExchangeKey = GetCompareExchangeKeyFromEmailOrUserName(user.UserName);
+                var reserveUserNameOperation = new PutCompareExchangeValueOperation<string>(compareExchangeKey, user.Id, 0);
+                var reserveUserNameResult = await DbSession.Advanced.DocumentStore.Operations.SendAsync(reserveUserNameOperation);
+                if (!reserveUserNameResult.Successful)
+                {
+                    return IdentityResult.Failed(new[]
+                    {
+                        new IdentityError
+                        {
+                            Code = "DuplicateUserName",
+                            Description = $"The user name {user.UserName} is already taken."
+                        }
+                    });
+                }
+
+                // Remove the cluster-wide compare/exchange key.
+                var deletionResult = await DeleteUserKeyReservation(oldUser.UserName);
+                if (!deletionResult.Successful)
+                {
+                    return IdentityResult.Failed(new[]
+                    {
+                        new IdentityError
+                        {
+                            Code = "ConcurrencyFailure",
+                            Description = "Unable to delete user name compare/exchange value"
+                        }
+                    });
+                }
+
+                // Clear session because we won't be able to store user (same id => exception!)
+                DbSession.Advanced.Clear();
+
+                // This model allows us to lookup a user by name in order to get the id
+                await DbSession.StoreAsync(user, cancellationToken);
+
+                // Because this a a cluster-wide operation due to compare/exchange tokens,
+                // we need to save changes here; if we can't store the user, 
+                // we need to roll back the email reservation.
+                try
+                {
+                    await DbSession.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                    // The compare/exchange email reservation is cluster-wide, outside of the session scope. 
+                    // We need to manually roll it back.
+                    await this.DeleteUserKeyReservation(user.UserName);
+                    throw;
+                }
+            }
+
+            return IdentityResult.Success;
         }
 
         /// <inheritdoc />
@@ -201,7 +273,7 @@ namespace Raven.Identity
             cancellationToken.ThrowIfCancellationRequested();
 
             // Remove the cluster-wide compare/exchange key.
-            var deletionResult = await DeleteUserEmailReservation(user.Email);
+            var deletionResult = await DeleteUserKeyReservation(user.Email);
             if (!deletionResult.Successful)
             {
                 return IdentityResult.Failed(new[]
@@ -239,7 +311,7 @@ namespace Raven.Identity
                 throw new ArgumentNullException(nameof(normalizedUserName));
             }
             
-            var compareExchangeKey = GetCompareExchangeKeyFromEmail(normalizedUserName);
+            var compareExchangeKey = GetCompareExchangeKeyFromEmailOrUserName(normalizedUserName);
             var getEmailReservationOperation = new GetCompareExchangeValueOperation<string>(compareExchangeKey);
             var emailReservationResultOrNull = await DbSession.Advanced.DocumentStore.Operations.SendAsync(getEmailReservationOperation);
             var userId = emailReservationResultOrNull?.Value;
@@ -831,7 +903,7 @@ namespace Raven.Identity
             // Step 2: store each email as a cluster-wide compare/exchange value.
             foreach (var (userId, email) in emails)
             {
-                var compareExchangeKey = GetCompareExchangeKeyFromEmail(email);
+                var compareExchangeKey = GetCompareExchangeKeyFromEmailOrUserName(email);
                 var storeOperation = new PutCompareExchangeValueOperation<string>(compareExchangeKey, userId, 0);
                 var storeResult = docStore.Operations.Send(storeOperation);
                 if (!storeResult.Successful)
@@ -887,9 +959,9 @@ namespace Raven.Identity
             token.ThrowIfCancellationRequested();
         }
 
-        private Task<CompareExchangeResult<string>> DeleteUserEmailReservation(string email)
+        private Task<CompareExchangeResult<string>> DeleteUserKeyReservation(string email)
         {
-            var key = GetCompareExchangeKeyFromEmail(email);
+            var key = GetCompareExchangeKeyFromEmailOrUserName(email);
             var store = DbSession.Advanced.DocumentStore;
 
             var readResult = store.Operations.Send(new GetCompareExchangeValueOperation<string>(key));
@@ -902,7 +974,7 @@ namespace Raven.Identity
             return DbSession.Advanced.DocumentStore.Operations.SendAsync(deleteEmailOperation);
         }
 
-        private static string GetCompareExchangeKeyFromEmail(string email)
+        private static string GetCompareExchangeKeyFromEmailOrUserName(string email)
         {
             return emailReservationKeyPrefix + email.ToLowerInvariant();
         }
