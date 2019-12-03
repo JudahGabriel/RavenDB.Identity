@@ -1,4 +1,9 @@
 ﻿using Raven.Client.Documents;
+using Raven.Client.Documents.Operations;
+using Raven.Client.Exceptions;
+using Raven.Client.Exceptions.Database;
+using Raven.Client.ServerWide;
+using Raven.Client.ServerWide.Operations;
 using Sample.Models;
 using System;
 using System.Collections.Generic;
@@ -13,17 +18,18 @@ namespace Sample.Common
         {
             try
             {
-                using (var dbSession = store.OpenSession())
-                {
-                    dbSession.Query<AppUser>().Take(0).ToList();
-                }
+                store.Maintenance.ForDatabase(store.Database).Send(new GetStatisticsOperation());
             }
-            catch (Raven.Client.Exceptions.Database.DatabaseDoesNotExistException)
+            catch (DatabaseDoesNotExistException)
             {
-                store.Maintenance.Server.Send(new Raven.Client.ServerWide.Operations.CreateDatabaseOperation(new Raven.Client.ServerWide.DatabaseRecord
+                try
                 {
-                    DatabaseName = store.Database
-                }));
+                    store.Maintenance.Server.Send(new CreateDatabaseOperation(new DatabaseRecord(store.Database)));
+                }
+                catch (ConcurrencyException)
+                {
+                    // The database was already created before calling CreateDatabaseOperation
+                }
             }
 
             return store;
