@@ -129,12 +129,7 @@ namespace Raven.Identity
 
             if (string.IsNullOrEmpty(user.Id))
             {
-                var conventions = DbSession.Advanced.DocumentStore.Conventions;
-                var entityName = conventions.GetCollectionName(typeof(TUser));
-				var prefix = conventions.TransformTypeCollectionNameToDocumentIdPrefix(entityName);
-                var separator = conventions.IdentityPartsSeparator;
-                var id = $"{prefix}{separator}{user.Email}";
-                user.Id = id;
+				user.Id = CreateId(user.Email);
             }
 
             if (string.IsNullOrEmpty(user.UserName))
@@ -144,15 +139,13 @@ namespace Raven.Identity
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            // See if the email address is already taken.
-            // We do this using Raven's compare/exchange functionality, which works cluster-wide.
-            // https://ravendb.net/docs/article-page/4.1/csharp/client-api/operations/compare-exchange/overview#creating-a-key
-            //
-            // Try to reserve a new user email 
-            // Note: This operation takes place outside of the session transaction it is a cluster-wide reservation.
-            var compareExchangeKey = GetCompareExchangeKeyFromEmailOrUserName(user.Email);
-            var reserveEmailOperation = new PutCompareExchangeValueOperation<string>(compareExchangeKey, user.Id, 0);
-            var reserveEmailResult = await DbSession.Advanced.DocumentStore.Operations.SendAsync(reserveEmailOperation);
+			// See if the email address is already taken.
+			// We do this using Raven's compare/exchange functionality, which works cluster-wide.
+			// https://ravendb.net/docs/article-page/4.1/csharp/client-api/operations/compare-exchange/overview#creating-a-key
+			//
+			// Try to reserve a new user email 
+			// Note: This operation takes place outside of the session transaction it is a cluster-wide reservation.
+			var reserveEmailResult = await CreateUserKeyReservationAsync(user.Email, user.Id);
             if (!reserveEmailResult.Successful)
             {
                 return IdentityResult.Failed(new[] 
@@ -189,81 +182,85 @@ namespace Raven.Identity
         /// <inheritdoc />
         public async Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
         {
-            // Make sure we have a valid user name.
-            if (string.IsNullOrWhiteSpace(user.UserName))
+			ThrowIfNullDisposedCancelled(user, cancellationToken);
+
+			// Make sure we have a valid email address.
+			if (string.IsNullOrWhiteSpace(user.Email))
+			{
+				throw new ArgumentException("The user's email address can't be null or empty.", nameof(user));
+			}
+
+			cancellationToken.ThrowIfCancellationRequested();
+
+			var oldEmail = user.Id.Substring(user.Id.IndexOf('/') + 1);
+			var newEmail = user.Email.ToLowerInvariant();
+            if (oldEmail != newEmail)
             {
-                throw new ArgumentException("The user's user name can't be null or empty.", nameof(user));
-            }
+				var oldId = user.Id;
+				var oldKey = GetCompareExchangeKeyFromEmailOrUserName(oldEmail);
+				var newKey = GetCompareExchangeKeyFromEmailOrUserName(user.Email);
 
-            cancellationToken.ThrowIfCancellationRequested();
+				user.Id = CreateId(user.Email);
 
-            // Clear session because oldUSer would not be loaded from database because it has the same id as user
-            DbSession.Advanced.Clear();
+				if (user.UserName.ToLowerInvariant() == oldEmail)
+				{
+					// The username was set by default as the email so we should update it.
+					user.UserName = user.Email;
+				}
 
-            // We must delete the old ExchangeCompareKey if the user name hast changed
-            // Therefore we get the unchanged user from database and compare the old username with the current username
+				var compareExchangeResult = await DeleteUserKeyReservation(oldEmail);
+				if (!compareExchangeResult.Successful)
+				{
+					return IdentityResult.Failed(new[]
+					{
+						new IdentityError
+						{
+							Code = "ConcurrencyFailure",
+							Description = "Unable to update user email."
+						}
+					});
+				}
 
-            var oldUser = await DbSession.LoadAsync<TUser>(user.Id, cancellationToken);
-            if (user.UserName != oldUser.UserName)
-            {
-                // See if the user name is already taken.
-                // We do this using Raven's compare/exchange functionality, which works cluster-wide.
-                // https://ravendb.net/docs/article-page/4.1/csharp/client-api/operations/compare-exchange/overview#creating-a-key
-                //
-                // Try to reserve a new user name 
-                // Note: This operation takes place outside of the session transaction it is a cluster-wide reservation.
-                var compareExchangeKey = GetCompareExchangeKeyFromEmailOrUserName(user.UserName);
-                var reserveUserNameOperation = new PutCompareExchangeValueOperation<string>(compareExchangeKey, user.Id, 0);
-                var reserveUserNameResult = await DbSession.Advanced.DocumentStore.Operations.SendAsync(reserveUserNameOperation);
-                if (!reserveUserNameResult.Successful)
-                {
-                    return IdentityResult.Failed(new[]
-                    {
-                        new IdentityError
-                        {
-                            Code = "DuplicateUserName",
-                            Description = $"The user name {user.UserName} is already taken."
-                        }
-                    });
-                }
+				compareExchangeResult = await CreateUserKeyReservationAsync(user.Email, user.Id);
+				if (!compareExchangeResult.Successful)
+				{
+					return IdentityResult.Failed(new[]
+					{
+						new IdentityError
+						{
+							Code = "ConcurrencyFailure",
+							Description = "Unable to update user email."
+						}
+					});
+				}
 
-                // Remove the cluster-wide compare/exchange key.
-                var deletionResult = await DeleteUserKeyReservation(oldUser.UserName);
-                if (!deletionResult.Successful)
-                {
-                    return IdentityResult.Failed(new[]
-                    {
-                        new IdentityError
-                        {
-                            Code = "ConcurrencyFailure",
-                            Description = "Unable to delete user name compare/exchange value"
-                        }
-                    });
-                }
+				try
+				{
+					// Stop tracking the user so we can delete the old one and
+					// create a new one using the same object.
+					DbSession.Advanced.Evict(user);
 
-                // Clear session because we won't be able to store user (same id => exception!)
-                DbSession.Advanced.Clear();
+					DbSession.Delete(oldId);
 
-                // This model allows us to lookup a user by name in order to get the id
-                await DbSession.StoreAsync(user, cancellationToken);
+					await DbSession.StoreAsync(user);
 
-                // Because this a a cluster-wide operation due to compare/exchange tokens,
-                // we need to save changes here; if we can't store the user, 
-                // we need to roll back the email reservation.
-                try
-                {
-                    await DbSession.SaveChangesAsync();
-                }
-                catch (Exception)
-                {
-                    // The compare/exchange email reservation is cluster-wide, outside of the session scope. 
-                    // We need to manually roll it back.
-                    await this.DeleteUserKeyReservation(user.UserName);
-                    throw;
-                }
-            }
+					await DbSession.SaveChangesAsync();
+				}
+				catch
+				{
+					// The compare/exchange email reservation is cluster-wide, outside of the session scope. 
+					// We need to manually roll it back.
+					await DeleteUserKeyReservation(newKey);
+					await CreateUserKeyReservationAsync(oldKey, oldId);
+					throw;
+				}
+			}
+			else
+			{
+				await DbSession.SaveChangesAsync();
+			}
 
-            return IdentityResult.Success;
+			return IdentityResult.Success;
         }
 
         /// <inheritdoc />
@@ -310,19 +307,8 @@ namespace Raven.Identity
             {
                 throw new ArgumentNullException(nameof(normalizedUserName));
             }
-            
-            var compareExchangeKey = GetCompareExchangeKeyFromEmailOrUserName(normalizedUserName);
-            var getEmailReservationOperation = new GetCompareExchangeValueOperation<string>(compareExchangeKey);
-            var emailReservationResultOrNull = await DbSession.Advanced.DocumentStore.Operations.SendAsync(getEmailReservationOperation);
-            var userId = emailReservationResultOrNull?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return null;
-            }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
-            return await FindByIdAsync(userId, cancellationToken);
+			return await DbSession.Query<TUser>().SingleOrDefaultAsync(u => u.UserName == normalizedUserName);
         }
 
         #endregion
@@ -959,7 +945,14 @@ namespace Raven.Identity
             token.ThrowIfCancellationRequested();
         }
 
-        private Task<CompareExchangeResult<string>> DeleteUserKeyReservation(string email)
+		private Task<CompareExchangeResult<string>> CreateUserKeyReservationAsync(string email, string id)
+		{
+			var compareExchangeKey = GetCompareExchangeKeyFromEmailOrUserName(email);
+			var reserveEmailOperation = new PutCompareExchangeValueOperation<string>(compareExchangeKey, id, 0);
+			return DbSession.Advanced.DocumentStore.Operations.SendAsync(reserveEmailOperation);
+		}
+
+		private Task<CompareExchangeResult<string>> DeleteUserKeyReservation(string email)
         {
             var key = GetCompareExchangeKeyFromEmailOrUserName(email);
             var store = DbSession.Advanced.DocumentStore;
@@ -978,5 +971,16 @@ namespace Raven.Identity
         {
             return emailReservationKeyPrefix + email.ToLowerInvariant();
         }
-    }
+
+		private string CreateId(string email)
+		{
+			var conventions = DbSession.Advanced.DocumentStore.Conventions;
+			var entityName = conventions.GetCollectionName(typeof(TUser));
+			var prefix = conventions.TransformTypeCollectionNameToDocumentIdPrefix(entityName);
+			var separator = conventions.IdentityPartsSeparator;
+			var id = $"{prefix}{separator}{email.ToLowerInvariant()}";
+
+			return id;
+		}
+	}
 }
