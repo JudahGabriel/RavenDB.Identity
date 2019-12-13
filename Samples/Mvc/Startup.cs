@@ -36,7 +36,8 @@ namespace Sample.Mvc
             services
                 .AddRavenDbDocStore() // Create our IDocumentStore singleton using the database settings in appsettings.json
                 .AddRavenDbAsyncSession() // Create an Raven IAsyncDocumentSession for every request.
-                .AddRavenDbIdentity<AppUser>(); // Let Raven store users and roles.
+                .AddIdentity<AppUser, Raven.Identity.IdentityRole>() // Tell ASP.NET to use identity framework.
+                .AddRavenDbIdentityStores<AppUser, Raven.Identity.IdentityRole>(); // Use Raven as the Identity store for user users and roles.
 
             services.AddControllersWithViews();
         }

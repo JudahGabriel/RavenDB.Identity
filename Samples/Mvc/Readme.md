@@ -109,7 +109,7 @@ public async Task<IActionResult> SignIn(SignInModel model)
 }
 ```
 
-## 5. Start.cs, wiring it all together
+## 5. Startup.cs, wiring it all together
 
 In [Startup.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Startup.cs), we wire up all of the above steps:
 
@@ -118,10 +118,12 @@ public void ConfigureServices(IServiceCollection services)
 {
     ...
 
+    // Add RavenDB and identity.
     services
-        .AddRavenDbDocStore() // Create our IDocumentStore singleton using the database settings in appsettings.json
-        .AddRavenDbAsyncSession() // Create an Raven IAsyncDocumentSession for every request.
-        .AddRavenDbIdentity<AppUser>(); // Let Raven store users and roles.
+        .AddRavenDbDocStore() // Create an IDocumentStore singleton from the RavenSettings.
+        .AddRavenDbAsyncSession() // Create a RavenDB IAsyncDocumentSession for each request. You're responsible for calling .SaveChanges after each request.
+        .AddIdentity<AppUser, IdentityRole>() // Adds an identity system to ASP.NET Core
+        .AddRavenDbIdentityStores<AppUser>(); // Use RavenDB as the store for identity users and roles.
 }
 ```
 
@@ -131,6 +133,7 @@ public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 {
     ...
     app.UseAuthentication();
+    app.UseAuthorization();
     ...
 }
 ```

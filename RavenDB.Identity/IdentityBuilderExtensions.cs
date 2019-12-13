@@ -18,9 +18,9 @@ namespace Raven.Identity
 		/// <typeparam name="TUser">The type of the user.</typeparam>
 		/// <param name="builder">The builder.</param>
 		/// <returns></returns>
-		public static IdentityBuilder AddRavenDbStores<TUser>(this IdentityBuilder builder) where TUser : IdentityUser
+		public static IdentityBuilder AddRavenDbIdentityStores<TUser>(this IdentityBuilder builder) where TUser : IdentityUser
 		{
-			return builder.AddRavenDbStores<TUser, IdentityRole>();
+			return builder.AddRavenDbIdentityStores<TUser, IdentityRole>();
 		}
 
 		/// <summary>
@@ -30,7 +30,7 @@ namespace Raven.Identity
 		/// <typeparam name="TRole">The type of the role.</typeparam>
 		/// <param name="builder">The builder.</param>
 		/// <returns>The builder.</returns>
-		public static IdentityBuilder AddRavenDbStores<TUser, TRole>(this IdentityBuilder builder)
+		public static IdentityBuilder AddRavenDbIdentityStores<TUser, TRole>(this IdentityBuilder builder)
 			where TUser : IdentityUser
 			where TRole : IdentityRole, new()
 		{

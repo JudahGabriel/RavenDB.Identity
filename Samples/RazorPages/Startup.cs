@@ -32,7 +32,9 @@ namespace Sample
                 .AddRavenDbAsyncSession(); // 2. Add a scoped IAsyncDocumentSession. For the sync version, use .AddRavenSession() instead.
 
             // 3. Add our RavenDB.Identity provider.
-            var identityBuilder = services.AddRavenDbIdentity<AppUser>();
+            var identityBuilder = services
+                .AddDefaultIdentity<AppUser>()
+                .AddRavenDbIdentityStores<AppUser>();
 
             // 4. Optional: some default UI pages for register/login/password reset/etc.
             identityBuilder.AddDefaultUI();

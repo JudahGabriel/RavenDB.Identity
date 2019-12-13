@@ -197,8 +197,8 @@ namespace Raven.Identity
             if (oldEmail != newEmail)
             {
 				var oldId = user.Id;
-				var oldKey = GetCompareExchangeKeyFromEmailOrUserName(oldEmail);
-				var newKey = GetCompareExchangeKeyFromEmailOrUserName(user.Email);
+				var oldKey = GetCompareExchangeKeyFromEmail(oldEmail);
+				var newKey = GetCompareExchangeKeyFromEmail(user.Email);
 
 				user.Id = CreateId(user.Email);
 
@@ -459,8 +459,10 @@ namespace Raven.Identity
             if (existingRoleOrNull == null)
             {
                 ThrowIfDisposedOrCancelled(cancellationToken);
-                existingRoleOrNull = new TRole();
-                existingRoleOrNull.Name = roleNameLowered;
+                existingRoleOrNull = new TRole
+                {
+                    Name = roleNameLowered
+                };
                 await this.DbSession.StoreAsync(existingRoleOrNull, roleId, cancellationToken);
             }
 
@@ -889,7 +891,7 @@ namespace Raven.Identity
             // Step 2: store each email as a cluster-wide compare/exchange value.
             foreach (var (userId, email) in emails)
             {
-                var compareExchangeKey = GetCompareExchangeKeyFromEmailOrUserName(email);
+                var compareExchangeKey = GetCompareExchangeKeyFromEmail(email);
                 var storeOperation = new PutCompareExchangeValueOperation<string>(compareExchangeKey, userId, 0);
                 var storeResult = docStore.Operations.Send(storeOperation);
                 if (!storeResult.Successful)
@@ -947,14 +949,14 @@ namespace Raven.Identity
 
 		private Task<CompareExchangeResult<string>> CreateUserKeyReservationAsync(string email, string id)
 		{
-			var compareExchangeKey = GetCompareExchangeKeyFromEmailOrUserName(email);
+			var compareExchangeKey = GetCompareExchangeKeyFromEmail(email);
 			var reserveEmailOperation = new PutCompareExchangeValueOperation<string>(compareExchangeKey, id, 0);
 			return DbSession.Advanced.DocumentStore.Operations.SendAsync(reserveEmailOperation);
 		}
 
 		private Task<CompareExchangeResult<string>> DeleteUserKeyReservation(string email)
         {
-            var key = GetCompareExchangeKeyFromEmailOrUserName(email);
+            var key = GetCompareExchangeKeyFromEmail(email);
             var store = DbSession.Advanced.DocumentStore;
 
             var readResult = store.Operations.Send(new GetCompareExchangeValueOperation<string>(key));
@@ -967,7 +969,7 @@ namespace Raven.Identity
             return DbSession.Advanced.DocumentStore.Operations.SendAsync(deleteEmailOperation);
         }
 
-        private static string GetCompareExchangeKeyFromEmailOrUserName(string email)
+        private static string GetCompareExchangeKeyFromEmail(string email)
         {
             return emailReservationKeyPrefix + email.ToLowerInvariant();
         }
@@ -978,9 +980,7 @@ namespace Raven.Identity
 			var entityName = conventions.GetCollectionName(typeof(TUser));
 			var prefix = conventions.TransformTypeCollectionNameToDocumentIdPrefix(entityName);
 			var separator = conventions.IdentityPartsSeparator;
-			var id = $"{prefix}{separator}{email.ToLowerInvariant()}";
-
-			return id;
+			return $"{prefix}{separator}{email.ToLowerInvariant()}";
 		}
 	}
 }

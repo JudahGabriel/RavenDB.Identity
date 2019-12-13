@@ -43,8 +43,17 @@ public void ConfigureServices(IServiceCollection services)
     services
         .AddRavenDbDocStore() // Create an IDocumentStore singleton from the RavenSettings.
         .AddRavenDbAsyncSession() // Create a RavenDB IAsyncDocumentSession for each request. You're responsible for calling .SaveChanges after each request.
-        .AddRavenDbIdentity<AppUser>(); // Use Raven to manage users and roles.
-    
+        .AddIdentity<AppUser, IdentityRole>() // Adds an identity system to ASP.NET Core
+        .AddRavenDbIdentityStores<AppUser>(); // Use RavenDB as the store for identity users and roles.
+    ...
+}
+
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+    ...
+    // Instruct ASP.NET Core to use authentication and authorization.
+    app.UseAuthentication();
+    app.UseAuthorization();
     ...
 }
 ```

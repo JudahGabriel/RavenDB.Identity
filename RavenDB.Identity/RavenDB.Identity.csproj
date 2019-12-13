@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>The simple and easy RavenDB Identity provider for ASP.NET Core. Use Raven to store your users and logins. As simple as services.AddRavenDbIdentity&lt;AppUser&gt;();</Description>
+    <Description>The simple and easy RavenDB Identity provider for ASP.NET Core. Use Raven to store your users and logins with just a few lines of code.</Description>
     <Authors>Judah Gabriel Himango</Authors>
     <TargetFrameworks>netstandard2.1</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -20,12 +20,13 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>6.2.0.2</Version>
+    <Version>7.0.0</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
     <PackageLicenseFile></PackageLicenseFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes>UpdateAsync works when changing user name.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed CreateAsync issue. Using IdentityCore and making API (mostly) mirror EntityFramework's Identity provider.</PackageReleaseNotes>
+    <nullable>enable</nullable>
   </PropertyGroup>
 
   <ItemGroup>

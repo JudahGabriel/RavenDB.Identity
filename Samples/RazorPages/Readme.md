@@ -80,33 +80,33 @@ public class RavenSaveChangesAsyncFilter : IAsyncPageFilter
 
 For MVC and Web API projects can use an action filter, or may alternately use a RavenController base class to accomplish the same thing.
 
-## 4. Start.cs, wiring it all together
+## 4. Startup.cs, wiring it all together
 
 In [Startup.cs](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Startup.cs), we wire up all of the above steps:
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-	// Grab our RavenSettings object from appsettings.json.
-    services.Configure<RavenSettings>(Configuration.GetSection("RavenSettings"));
+	// Configure Raven Identity in just a few lines of code:
+    services
+        .AddRavenDbDocStore() // 1. Configures Raven connection using the settings in appsettings.json.
+        .AddRavenDbAsyncSession(); // 2. Add a scoped IAsyncDocumentSession. For the sync version, use .AddRavenSession() instead.
+
+    // 3. Add our RavenDB.Identity provider.
+    var identityBuilder = services
+        .AddDefaultIdentity<AppUser>()
+        .AddRavenDbIdentityStores<AppUser>();
 
 	...
-
-	// Add an IDocumentStore singleton, with settings pulled from the RavenSettings.
-    services.AddRavenDbDocStore();
-
-    // Add a scoped IAsyncDocumentSession. For the sync version, use .AddRavenSession() instead.
-    // Note: Your code is responsible for calling .SaveChangesAsync() on this. This Sample does so via the RavenSaveChangesAsyncFilter.
-    services.AddRavenDbAsyncSession();
-
-	// Use Raven for our users
-	services.AddRavenDbIdentity<AppUser>();
-	
-	...
-
-	// Call .SaveChangesAsync() after each action.
-	services
-		.AddMvc(o => o.Filters.Add<RavenSaveChangesAsyncFilter>())
-		.SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 }
+
+public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+{
+    ...
+    // Instruct AspNetCore to use authentication and authorization.
+    app.UseAuthentication();
+    app.UseAuthorization();
+    ...
+}
+
 ```
