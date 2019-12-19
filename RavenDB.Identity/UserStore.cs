@@ -316,7 +316,7 @@ namespace Raven.Identity
         #region IUserLoginStore implementation
 
         /// <inheritdoc />
-        public async Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken)
+        public Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
             if (login == null)
@@ -324,59 +324,30 @@ namespace Raven.Identity
                 throw new ArgumentNullException(nameof(login));
             }
 
-            if (!user.Logins.Any(x => x.LoginProvider == login.LoginProvider && x.ProviderKey == login.ProviderKey))
-            {
-                user.Logins.Add(login);
-
-                var userLogin = new IdentityUserLogin
-                {
-                    Id = Util.GetLoginId(login),
-                    UserId = user.Id,
-                    Provider = login.LoginProvider,
-                    ProviderKey = login.ProviderKey
-                };
-                await DbSession.StoreAsync(userLogin);
-            }
+            user.Logins.Add(login);
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc />
-        public async Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
+        public Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
-
-            var login = new UserLoginInfo(loginProvider, providerKey, string.Empty);
-            string loginId = Util.GetLoginId(login);
-            var loginDoc = await DbSession.LoadAsync<IdentityUserLogin>(loginId);
-            if (loginDoc != null)
-            {
-                DbSession.Delete(loginDoc);
-            }
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            user.Logins.RemoveAll(x => x.LoginProvider == login.LoginProvider && x.ProviderKey == login.ProviderKey);
+            user.Logins.RemoveAll(l => l.LoginProvider == loginProvider && l.ProviderKey == providerKey);
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc />
         public Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
-
-            return Task.FromResult(user.Logins.ToIList());
+            return Task.FromResult(user.Logins as IList<UserLoginInfo>);
         }
 
         /// <inheritdoc />
-        public async Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
+        public Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            var login = new UserLoginInfo(loginProvider, providerKey, string.Empty);
-            string loginId = Util.GetLoginId(login);
-            var loginDoc = await DbSession.LoadAsync<IdentityUserLogin>(loginId);
-            if (loginDoc != null)
-            {
-                return await DbSession.LoadAsync<TUser>(loginDoc.UserId);
-            }
-
-            return null;
+            return DbSession.Query<TUser>()
+                .FirstOrDefaultAsync(u => u.Logins.Any(l => l.LoginProvider == loginProvider && l.ProviderKey == providerKey));
         }
 
         #endregion
@@ -791,48 +762,38 @@ namespace Raven.Identity
         #region IUserAuthenticationTokenStore
 
         /// <inheritdoc />
-        public async Task SetTokenAsync(TUser user, string loginProvider, string name, string value, CancellationToken cancellationToken)
+        public Task SetTokenAsync(TUser user, string loginProvider, string name, string value, CancellationToken cancellationToken)
         {
-            var id = IdentityUserAuthToken.GetWellKnownId(DbSession.Advanced.DocumentStore, user.Id, loginProvider, name);
-            ThrowIfDisposedOrCancelled(cancellationToken);
-
-            var existingOrNull = await DbSession.LoadAsync<IdentityUserAuthToken>(id);
-            if (existingOrNull == null)
+            var existingToken = user.Tokens.FirstOrDefault(t => t.LoginProvider == loginProvider && t.Name == name);
+            if (existingToken != null)
             {
-                existingOrNull = new IdentityUserAuthToken
+                existingToken.Value = value;
+            }
+            else
+            {
+                user.Tokens.Add(new IdentityUserAuthToken
                 {
-                    Id = id,
                     LoginProvider = loginProvider,
                     Name = name,
-                    UserId = user.Id,
                     Value = value
-                };
-                await DbSession.StoreAsync(existingOrNull);
+                });
             }
-
-            existingOrNull.Value = value;
-        }
-
-        /// <inheritdoc />
-        public Task RemoveTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
-        {
-            var id = IdentityUserAuthToken.GetWellKnownId(DbSession.Advanced.DocumentStore, user.Id, loginProvider, name);
-            DbSession.Delete(id);
 
             return Task.CompletedTask;
         }
 
         /// <inheritdoc />
-        public async Task<string> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
+        public Task RemoveTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
         {
-            var id = IdentityUserAuthToken.GetWellKnownId(DbSession.Advanced.DocumentStore, user.Id, loginProvider, name);
-            var tokenOrNull = await DbSession.LoadAsync<IdentityUserAuthToken>(id);
-            if (tokenOrNull == null)
-            {
-                return null;
-            }
+            user.Tokens.RemoveAll(t => t.LoginProvider == loginProvider && t.Name == name);
+            return Task.CompletedTask;
+        }
 
-            return tokenOrNull.Value;
+        /// <inheritdoc />
+        public Task<string?> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
+        {
+            var tokenOrNull = user.Tokens.FirstOrDefault(t => t.LoginProvider == loginProvider && t.Name == name);
+            return Task.FromResult(tokenOrNull?.Value);
         }
         
         /// <inheritdoc />

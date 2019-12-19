@@ -103,6 +103,11 @@ namespace Raven.Identity
         public virtual List<string> TwoFactorRecoveryCodes { get; set; }
 
         /// <summary>
+        /// The list authorization tokens from 3rd party authentication, e.g. Google, Microsoft, GitHub, etc.
+        /// </summary>
+        public virtual List<IdentityUserAuthToken> Tokens { get; set; }
+
+        /// <summary>
         /// Creates a new IdentityUser.
         /// </summary>
         public IdentityUser()
@@ -111,6 +116,7 @@ namespace Raven.Identity
             this.Roles = new List<string>();
             this.Logins = new List<UserLoginInfo>();
             this.TwoFactorRecoveryCodes = new List<string>();
+            this.Tokens = new List<IdentityUserAuthToken>();
         }
 
         /// <summary>
@@ -123,28 +129,28 @@ namespace Raven.Identity
         }
     }
 
-    /// <summary>
-    /// Defines a user login.
-    /// </summary>
-    public sealed class IdentityUserLogin
-    {
-        /// <summary>
-        /// The ID of the login.
-        /// </summary>
-        public string Id { get; set; }
-        /// <summary>
-        /// The user ID.
-        /// </summary>
-        public string UserId { get; set; }
-        /// <summary>
-        /// The login provider.
-        /// </summary>
-        public string Provider { get; set; }
-        /// <summary>
-        /// The login provider key.
-        /// </summary>
-        public string ProviderKey { get; set; }
-    }
+    ///// <summary>
+    ///// Defines a user login.
+    ///// </summary>
+    //public sealed class IdentityUserLogin
+    //{
+    //    /// <summary>
+    //    /// The ID of the login.
+    //    /// </summary>
+    //    public string Id { get; set; }
+    //    /// <summary>
+    //    /// The user ID.
+    //    /// </summary>
+    //    public string UserId { get; set; }
+    //    /// <summary>
+    //    /// The login provider.
+    //    /// </summary>
+    //    public string Provider { get; set; }
+    //    /// <summary>
+    //    /// The login provider key.
+    //    /// </summary>
+    //    public string ProviderKey { get; set; }
+    //}
 
     /// <summary>
     /// A login claim.

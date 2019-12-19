@@ -20,12 +20,12 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>7.0.0</Version>
+    <Version>7.0.1</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
     <PackageLicenseFile></PackageLicenseFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes>Fixed CreateAsync issue. Using IdentityCore and making API (mostly) mirror EntityFramework's Identity provider.</PackageReleaseNotes>
+    <PackageReleaseNotes>External logins are stored as part of the user, rather than separate documents. Implementation mirrors other NoSQL identity providers.</PackageReleaseNotes>
     <nullable>enable</nullable>
   </PropertyGroup>
 
