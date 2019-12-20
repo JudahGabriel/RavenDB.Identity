@@ -44,7 +44,7 @@ namespace Sample.Mvc.Controllers
                 signInResult.IsNotAllowed ? "Your user is not allowed to sign in" :
                 signInResult.RequiresTwoFactor ? "2FA is required" :
                 "Bad user name or password";
-            return RedirectToAction("SignInFailure", new { reason = reason });
+            return RedirectToAction("SignInFailure", new { reason });
         }
 
         [HttpGet]

@@ -15,37 +15,37 @@ namespace Raven.Identity
         /// <summary>
         /// The ID of the user.
         /// </summary>
-        public virtual string Id { get; set; }
+        public virtual string? Id { get; set; }
 
         /// <summary>
         /// The user name. Usually the same as the email.
         /// </summary>
-        public virtual string UserName { get; set; }
+        public virtual string UserName { get; set; } = string.Empty;
 
         /// <summary>
         /// The password hash.
         /// </summary>
-        public virtual string PasswordHash { get; set; }
+        public virtual string? PasswordHash { get; set; }
 
         /// <summary>
         /// The security stamp.
         /// </summary>
-        public virtual string SecurityStamp { get; set; }
+        public virtual string? SecurityStamp { get; set; }
 
         /// <summary>
         /// The concurrency stamp.
         /// </summary>
-        public virtual string ConcurrencyStamp { get; set; }
+        public virtual string? ConcurrencyStamp { get; set; }
 
         /// <summary>
         /// The email of the user.
         /// </summary>
-        public virtual string Email { get; set; }
+        public virtual string Email { get; set; } = string.Empty;
 
         /// <summary>
         /// The phone number.
         /// </summary>
-        public virtual string PhoneNumber { get; set; }
+        public virtual string? PhoneNumber { get; set; }
 
         /// <summary>
         /// Whether the user has confirmed their email address.
@@ -80,45 +80,33 @@ namespace Raven.Identity
         /// <summary>
         /// The two-factor authenticator key.
         /// </summary>
-        public string TwoFactorAuthenticatorKey { get; set; }
+        public string? TwoFactorAuthenticatorKey { get; set; }
 
         /// <summary>
         /// The roles of the user. To modify the user's roles, use <see cref="UserManager{TUser}.AddToRoleAsync(TUser, string)"/> and <see cref="UserManager{TUser}.RemoveFromRolesAsync(TUser, IEnumerable{string})"/>.
         /// </summary>
-        public virtual IReadOnlyList<string> Roles { get; private set; }
+        public virtual IReadOnlyList<string> Roles { get; private set; } = new List<string>();
 
         /// <summary>
         /// The user's claims, for use in claims-based authentication.
         /// </summary>
-        public virtual List<IdentityUserClaim> Claims { get; private set; }
+        public virtual List<IdentityUserClaim> Claims { get; private set; } = new List<IdentityUserClaim>();
 
         /// <summary>
         /// The logins of the user.
         /// </summary>
-        public virtual List<UserLoginInfo> Logins { get; private set; }
+        public virtual List<UserLoginInfo> Logins { get; private set; } = new List<UserLoginInfo>();
 
         /// <summary>
         /// The list of two factor authentication recovery codes.
         /// </summary>
-        public virtual List<string> TwoFactorRecoveryCodes { get; set; }
+        public virtual List<string> TwoFactorRecoveryCodes { get; set; } = new List<string>();
 
         /// <summary>
         /// The list authorization tokens from 3rd party authentication, e.g. Google, Microsoft, GitHub, etc.
         /// </summary>
-        public virtual List<IdentityUserAuthToken> Tokens { get; set; }
-
-        /// <summary>
-        /// Creates a new IdentityUser.
-        /// </summary>
-        public IdentityUser()
-        {
-            this.Claims = new List<IdentityUserClaim>();
-            this.Roles = new List<string>();
-            this.Logins = new List<UserLoginInfo>();
-            this.TwoFactorRecoveryCodes = new List<string>();
-            this.Tokens = new List<IdentityUserAuthToken>();
-        }
-
+        public virtual List<IdentityUserAuthToken> Tokens { get; set; } = new List<IdentityUserAuthToken>();
+        
         /// <summary>
         /// Gets the mutable roles list. This shouldn't be modified by user code; roles should be changed via UserManager instead.
         /// </summary>
@@ -129,29 +117,6 @@ namespace Raven.Identity
         }
     }
 
-    ///// <summary>
-    ///// Defines a user login.
-    ///// </summary>
-    //public sealed class IdentityUserLogin
-    //{
-    //    /// <summary>
-    //    /// The ID of the login.
-    //    /// </summary>
-    //    public string Id { get; set; }
-    //    /// <summary>
-    //    /// The user ID.
-    //    /// </summary>
-    //    public string UserId { get; set; }
-    //    /// <summary>
-    //    /// The login provider.
-    //    /// </summary>
-    //    public string Provider { get; set; }
-    //    /// <summary>
-    //    /// The login provider key.
-    //    /// </summary>
-    //    public string ProviderKey { get; set; }
-    //}
-
     /// <summary>
     /// A login claim.
     /// </summary>
@@ -160,11 +125,11 @@ namespace Raven.Identity
         /// <summary>
         /// The type of the login claim.
         /// </summary>
-        public virtual string ClaimType { get; set; }
+        public virtual string ClaimType { get; set; } = string.Empty;
         /// <summary>
         /// The login claim value.
         /// </summary>
-        public virtual string ClaimValue { get; set; }
+        public virtual string ClaimValue { get; set; } = string.Empty;
     }
 
     /// <summary>

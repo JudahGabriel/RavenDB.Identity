@@ -36,8 +36,8 @@ namespace Raven.Identity
 		where TRole : IdentityRole, new()
     {
         private bool _disposed;
-        private readonly Func<IAsyncDocumentSession> getSessionFunc;
-        private IAsyncDocumentSession _session;
+        private readonly Func<IAsyncDocumentSession>? getSessionFunc;
+        private IAsyncDocumentSession? _session;
 
         private const string emailReservationKeyPrefix = "emails/";
 
@@ -74,44 +74,24 @@ namespace Raven.Identity
         #region IUserStore implementation
 
         /// <inheritdoc />
-        public Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken)
-        {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
-            return Task.FromResult(user.Id);
-        }
+        public Task<string?> GetUserIdAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.Id);
 
         /// <inheritdoc />
-        public Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken)
-        {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
-            return Task.FromResult(user.UserName);
-        }
+        public Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.UserName);
 
         /// <inheritdoc />
         public Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken)
         {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
             user.UserName = userName;
             return Task.CompletedTask;
         }
 
         /// <inheritdoc />
-        public Task<string> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken)
-        {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
-            // Raven string comparison queries are case-insensitive. We can just return the user name.
-            return Task.FromResult(user.UserName);
-        }
+        public Task<string> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.UserName);
 
         /// <inheritdoc />
         public Task SetNormalizedUserNameAsync(TUser user, string normalizedName, CancellationToken cancellationToken)
         {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
             user.UserName = normalizedName.ToLowerInvariant();
             return Task.CompletedTask;
         }
@@ -129,7 +109,7 @@ namespace Raven.Identity
 
             if (string.IsNullOrEmpty(user.Id))
             {
-				user.Id = CreateId(user.Email);
+				user.Id = CreateUserId(user.Email);
             }
 
             if (string.IsNullOrEmpty(user.UserName))
@@ -189,10 +169,13 @@ namespace Raven.Identity
 			{
 				throw new ArgumentException("The user's email address can't be null or empty.", nameof(user));
 			}
+            if (user.Id == null)
+            {
+                throw new ArgumentException("The user can't have a null ID.");
+            }
 
 			cancellationToken.ThrowIfCancellationRequested();
-
-			var oldEmail = user.Id.Substring(user.Id.IndexOf('/') + 1);
+			var oldEmail = user.Id.Substring(user.Id.IndexOf(DbSession.Advanced.DocumentStore.Conventions.IdentityPartsSeparator) + 1);
 			var newEmail = user.Email.ToLowerInvariant();
             if (oldEmail != newEmail)
             {
@@ -200,7 +183,7 @@ namespace Raven.Identity
 				var oldKey = GetCompareExchangeKeyFromEmail(oldEmail);
 				var newKey = GetCompareExchangeKeyFromEmail(user.Email);
 
-				user.Id = CreateId(user.Email);
+				user.Id = CreateUserId(user.Email);
 
 				if (user.UserName.ToLowerInvariant() == oldEmail)
 				{
@@ -239,11 +222,8 @@ namespace Raven.Identity
 					// Stop tracking the user so we can delete the old one and
 					// create a new one using the same object.
 					DbSession.Advanced.Evict(user);
-
 					DbSession.Delete(oldId);
-
 					await DbSession.StoreAsync(user);
-
 					await DbSession.SaveChangesAsync();
 				}
 				catch
@@ -292,24 +272,13 @@ namespace Raven.Identity
         }
 
         /// <inheritdoc />
-        public Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
-        {
-            ThrowIfDisposedOrCancelled(cancellationToken);
-
-            return DbSession.LoadAsync<TUser>(userId);
-        }
+        public Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken) => 
+            this.DbSession.LoadAsync<TUser>(userId);
 
         /// <inheritdoc />
-        public async Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
-        {
-            ThrowIfDisposedOrCancelled(cancellationToken);
-            if (string.IsNullOrEmpty(normalizedUserName))
-            {
-                throw new ArgumentNullException(nameof(normalizedUserName));
-            }
-
-			return await DbSession.Query<TUser>().SingleOrDefaultAsync(u => u.UserName == normalizedUserName);
-        }
+        public Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) => 
+            DbSession.Query<TUser>()
+            .SingleOrDefaultAsync(u => u.UserName == normalizedUserName);
 
         #endregion
 
@@ -444,7 +413,7 @@ namespace Raven.Identity
                 user.GetRolesList().Add(roleRealName);
             }
 
-            if (!existingRoleOrNull.Users.Contains(user.Id, StringComparer.InvariantCultureIgnoreCase))
+            if (user.Id != null && !existingRoleOrNull.Users.Contains(user.Id, StringComparer.InvariantCultureIgnoreCase))
             {
                 existingRoleOrNull.Users.Add(user.Id);
             }
@@ -459,7 +428,7 @@ namespace Raven.Identity
 
             var roleId = RoleStore<TRole>.GetRavenIdFromRoleName(roleName, DbSession.Advanced.DocumentStore);
             var roleOrNull = await DbSession.LoadAsync<IdentityRole>(roleId, cancellationToken);
-            if (roleOrNull != null)
+            if (roleOrNull != null && user.Id != null)
             {
                 roleOrNull.Users.Remove(user.Id);
             }
@@ -514,10 +483,9 @@ namespace Raven.Identity
         }
 
         /// <inheritdoc />
-        public Task<string> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken)
+        public Task<string?> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
-
             return Task.FromResult(user.PasswordHash);
         }
 
@@ -525,7 +493,6 @@ namespace Raven.Identity
         public Task<bool> HasPasswordAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
-
             return Task.FromResult(user.PasswordHash != null);
         }
 
@@ -543,7 +510,7 @@ namespace Raven.Identity
         }
 
         /// <inheritdoc />
-        public Task<string> GetSecurityStampAsync(TUser user, CancellationToken cancellationToken)
+        public Task<string?> GetSecurityStampAsync(TUser user, CancellationToken cancellationToken)
         {
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
@@ -563,57 +530,31 @@ namespace Raven.Identity
         }
 
         /// <inheritdoc />
-        public Task<string> GetEmailAsync(TUser user, CancellationToken cancellationToken)
-        {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
-            return Task.FromResult(user.Email);
-        }
+        public Task<string> GetEmailAsync(TUser user, CancellationToken cancellationToken) => 
+            Task.FromResult(user.Email);
 
         /// <inheritdoc />
-        public Task<bool> GetEmailConfirmedAsync(TUser user, CancellationToken cancellationToken)
-        {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
-            return Task.FromResult(user.EmailConfirmed);
-        }
+        public Task<bool> GetEmailConfirmedAsync(TUser user, CancellationToken cancellationToken) => 
+            Task.FromResult(user.EmailConfirmed);
 
         /// <inheritdoc />
         public Task SetEmailConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken)
         {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
             user.EmailConfirmed = confirmed;
             return Task.CompletedTask;
         }
 
         /// <inheritdoc />
-        public Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
-        {
-            ThrowIfDisposedOrCancelled(cancellationToken);
-
-            return DbSession.Query<TUser>()
-                .FirstOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
-        }
+        public Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken) => 
+            DbSession.Query<TUser>().FirstOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
 
         /// <inheritdoc />
-        public Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken)
-        {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
-            // Raven string comparison queries are case-insensitive. We can just return the user name.
-            return Task.FromResult(user.Email);
-        }
+        public Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken) =>
+            Task.FromResult(user.Email);
 
         /// <inheritdoc />
         public Task SetNormalizedEmailAsync(TUser user, string normalizedEmail, CancellationToken cancellationToken)
         {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-            if (string.IsNullOrEmpty(normalizedEmail))
-            {
-                throw new ArgumentNullException(nameof(normalizedEmail));
-            }
-
             user.Email = normalizedEmail.ToLowerInvariant(); // I don't like the ALL CAPS default. We're going all lower.
             return Task.CompletedTask;
         }
@@ -709,33 +650,21 @@ namespace Raven.Identity
         /// <inheritdoc />
         public Task SetPhoneNumberAsync(TUser user, string phoneNumber, CancellationToken cancellationToken)
         {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
             user.PhoneNumber = phoneNumber;
             return Task.CompletedTask;
         }
 
         /// <inheritdoc />
-        public Task<string> GetPhoneNumberAsync(TUser user, CancellationToken cancellationToken)
-        {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
-            return Task.FromResult(user.PhoneNumber);
-        }
+        public Task<string?> GetPhoneNumberAsync(TUser user, CancellationToken cancellationToken) => 
+            Task.FromResult(user.PhoneNumber);
 
         /// <inheritdoc />
-        public Task<bool> GetPhoneNumberConfirmedAsync(TUser user, CancellationToken cancellationToken)
-        {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
-            return Task.FromResult(user.PhoneNumberConfirmed);
-        }
+        public Task<bool> GetPhoneNumberConfirmedAsync(TUser user, CancellationToken cancellationToken) =>
+            Task.FromResult(user.PhoneNumberConfirmed);
 
         /// <inheritdoc />
         public Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken)
         {
-            ThrowIfNullDisposedCancelled(user, cancellationToken);
-
             user.PhoneNumberConfirmed = confirmed;
             return Task.CompletedTask;
         }
@@ -752,7 +681,7 @@ namespace Raven.Identity
         }
 
         /// <inheritdoc />
-        public Task<string> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken)
+        public Task<string?> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.TwoFactorAuthenticatorKey);
         }
@@ -880,7 +809,7 @@ namespace Raven.Identity
             {
                 if (_session == null)
                 {
-                    _session = getSessionFunc();
+                    _session = getSessionFunc!();
                 }
                 return _session;
             }
@@ -935,7 +864,7 @@ namespace Raven.Identity
             return emailReservationKeyPrefix + email.ToLowerInvariant();
         }
 
-		private string CreateId(string email)
+		private string CreateUserId(string email)
 		{
 			var conventions = DbSession.Advanced.DocumentStore.Conventions;
 			var entityName = conventions.GetCollectionName(typeof(TUser));

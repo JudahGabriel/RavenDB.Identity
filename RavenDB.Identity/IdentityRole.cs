@@ -62,12 +62,12 @@ namespace Raven.Identity
         /// <summary>
         /// Gets or sets the primary key for this role.
         /// </summary>
-        public virtual string Id { get; set; }
+        public virtual string? Id { get; set; }
 
         /// <summary>
         /// Gets or sets the name for this role.
         /// </summary>
-        public virtual string Name { get; set; }
+        public virtual string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Returns the name of the role.
