@@ -300,7 +300,7 @@ namespace Raven.Identity
         }
 
         /// <inheritdoc />
-        public async Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+        public Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
             ThrowIfDisposedOrCancelled(cancellationToken);
             if (string.IsNullOrEmpty(normalizedUserName))
@@ -308,7 +308,8 @@ namespace Raven.Identity
                 throw new ArgumentNullException(nameof(normalizedUserName));
             }
 
-			return await DbSession.Query<TUser>().SingleOrDefaultAsync(u => u.UserName == normalizedUserName);
+			return DbSession.Query<TUser>()
+                .SingleOrDefaultAsync(u => u.UserName == normalizedUserName);
         }
 
         #endregion
@@ -621,8 +622,8 @@ namespace Raven.Identity
         {
             ThrowIfDisposedOrCancelled(cancellationToken);
 
-            return DbSession.Query<TUser>()
-                .FirstOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
+            var id = CreateId(normalizedEmail);
+            return DbSession.LoadAsync<TUser>(id);
         }
 
         /// <inheritdoc />
