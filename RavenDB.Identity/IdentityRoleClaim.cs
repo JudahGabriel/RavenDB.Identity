@@ -13,12 +13,12 @@ namespace Raven.Identity
         /// <summary>
         /// Gets or sets the claim type for this claim.
         /// </summary>
-        public virtual string ClaimType { get; set; }
+        public virtual string? ClaimType { get; set; }
 
         /// <summary>
         /// Gets or sets the claim value for this claim.
         /// </summary>
-        public virtual string ClaimValue { get; set; }
+        public virtual string? ClaimValue { get; set; }
 
         /// <summary>
         /// Constructs a new claim with the type and value.
