@@ -41,7 +41,6 @@ namespace Raven.Identity
 	    /// <typeparam name="TUser">The type of the user.</typeparam>
 	    /// <typeparam name="TRole">The type of the role.</typeparam>
 	    /// <param name="builder">The builder.</param>
-	    /// <param name="configure">Configure options for Raven Identity</param>
 	    /// <returns>The builder.</returns>
 	    public static IdentityBuilder AddRavenDbIdentityStores<TUser, TRole>(this IdentityBuilder builder)
 		    where TUser : IdentityUser
