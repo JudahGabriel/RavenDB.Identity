@@ -47,6 +47,7 @@ namespace Raven.Identity
         /// Creates a new user store that uses the Raven document session returned from the specified session fetcher.
         /// </summary>
         /// <param name="getSession">The function that gets the Raven document session.</param>
+        /// <param name="options"></param>
         public UserStore(Func<IAsyncDocumentSession> getSession, IOptions<RavenIdentityOptions> options)
         {
             this.getSessionFunc = getSession;
@@ -57,6 +58,7 @@ namespace Raven.Identity
         /// Creates a new user store that uses the specified Raven document session.
         /// </summary>
         /// <param name="session"></param>
+        /// <param name="options"></param>
         public UserStore(IAsyncDocumentSession session, IOptions<RavenIdentityOptions> options)
         {
             this._session = session;
@@ -119,11 +121,6 @@ namespace Raven.Identity
                 user.UserName = user.Email;
             }
 
-            if (!_stableUserId)
-            {
-                user.Id = CreateEmailDerivedUserId(user.Email);
-            }
-
             cancellationToken.ThrowIfCancellationRequested();
 
 			// See if the email address is already taken.
@@ -133,7 +130,11 @@ namespace Raven.Identity
 			// Try to reserve a new user email
 			// Note: This operation takes place outside of the session transaction it is a cluster-wide reservation.
             // If we are using a stable id, pass a placeholder value, we will replace it shortly
-            var reservationId = _stableUserId ? "-1" : user.Id;
+            var reservationId = "-1";
+            if (!_stableUserId)
+            {
+                reservationId = user.Id = CreateEmailDerivedUserId(user.Email);
+            }
 			var reserveEmailResult = await CreateUserKeyReservationAsync(user.Email, reservationId);
             if (!reserveEmailResult.Successful)
             {

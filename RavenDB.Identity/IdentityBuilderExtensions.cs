@@ -19,7 +19,7 @@ namespace Raven.Identity
 	    /// <param name="builder">The builder.</param>
 	    /// <param name="configure">Configure options for Raven Identity</param>
 	    /// <returns></returns>
-	    public static IdentityBuilder AddRavenDbIdentityStores<TUser>(this IdentityBuilder builder, Action<RavenIdentityOptions> configure = null) where TUser : IdentityUser
+	    public static IdentityBuilder AddRavenDbIdentityStores<TUser>(this IdentityBuilder builder, Action<RavenIdentityOptions>? configure = null) where TUser : IdentityUser
 		{
 			return builder.AddRavenDbIdentityStores<TUser, IdentityRole>(configure);
 		}
@@ -32,7 +32,7 @@ namespace Raven.Identity
 	    /// <param name="builder">The builder.</param>
 	    /// <param name="configure">Configure options for Raven Identity</param>
 	    /// <returns>The builder.</returns>
-	    public static IdentityBuilder AddRavenDbIdentityStores<TUser, TRole>(this IdentityBuilder builder, Action<RavenIdentityOptions> configure = null)
+	    public static IdentityBuilder AddRavenDbIdentityStores<TUser, TRole>(this IdentityBuilder builder, Action<RavenIdentityOptions>? configure = null)
 			where TUser : IdentityUser
 			where TRole : IdentityRole, new()
 		{
