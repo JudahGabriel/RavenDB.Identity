@@ -603,6 +603,10 @@ namespace Raven.Identity
         {
             var getReq = new GetCompareExchangeValueOperation<string>(GetCompareExchangeKeyFromEmail(normalizedEmail));
             var idResult = await DbSession.Advanced.DocumentStore.Operations.SendAsync(getReq, token: cancellationToken);
+            if (idResult == null)
+            {
+                return null;
+            }
             return await DbSession.LoadAsync<TUser>(idResult.Value, cancellationToken);
         }
 
