@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Operations.CompareExchange;
@@ -266,19 +266,19 @@ namespace Raven.Identity
             // Delete the user and save it. We must save it because deleting is a cluster-wide operation.
             // Only if the deletion succeeds will we remove the cluseter-wide compare/exchange key.
             this.DbSession.Delete(user);
-            await this.DbSession.SaveChangesAsync();
+            await this.DbSession.SaveChangesAsync(cancellationToken);
 
             return IdentityResult.Success;
         }
 
         /// <inheritdoc />
         public Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken) => 
-            this.DbSession.LoadAsync<TUser>(userId);
+            this.DbSession.LoadAsync<TUser>(userId, cancellationToken);
 
         /// <inheritdoc />
-        public Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) => 
+        public Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) =>
             DbSession.Query<TUser>()
-            .SingleOrDefaultAsync(u => u.UserName == normalizedUserName);
+            .SingleOrDefaultAsync(u => u.UserName == normalizedUserName, token: cancellationToken);
 
         #endregion
 
@@ -525,7 +525,7 @@ namespace Raven.Identity
         public Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken)
         {
             ThrowIfDisposedOrCancelled(cancellationToken);
-            user.Email = email ?? throw new ArgumentNullException(nameof(email));
+            user.Email = email.ToLowerInvariant() ?? throw new ArgumentNullException(nameof(email));
             return Task.CompletedTask;
         }
 
@@ -545,8 +545,12 @@ namespace Raven.Identity
         }
 
         /// <inheritdoc />
-        public Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken) => 
-            DbSession.Query<TUser>().FirstOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
+        public async Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+        {
+            var getReq = new GetCompareExchangeValueOperation<string>(GetCompareExchangeKeyFromEmail(normalizedEmail));
+            var idResult = await DbSession.Advanced.DocumentStore.Operations.SendAsync(getReq, token: cancellationToken);
+            return await DbSession.LoadAsync<TUser>(idResult.Value, cancellationToken);
+        }
 
         /// <inheritdoc />
         public Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken) =>
