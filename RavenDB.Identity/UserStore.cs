@@ -641,15 +641,15 @@ namespace Raven.Identity
         }
 
         /// <inheritdoc />
-#pragma warning disable 8632
         public async Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
-#pragma warning restore 8632
         {
             var getReq = new GetCompareExchangeValueOperation<string>(GetCompareExchangeKeyFromEmail(normalizedEmail));
             var idResult = await DbSession.Advanced.DocumentStore.Operations.SendAsync(getReq, token: cancellationToken);
             if (idResult == null)
             {
+                #pragma warning disable 8603
                 return null;
+                #pragma warning restore 8603
             }
             return await DbSession.LoadAsync<TUser>(idResult.Value, cancellationToken);
         }
