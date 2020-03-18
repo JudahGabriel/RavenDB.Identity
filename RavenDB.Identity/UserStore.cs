@@ -159,39 +159,40 @@ namespace Raven.Identity
             // This model allows us to lookup a user by name in order to get the id
             await DbSession.StoreAsync(user, cancellationToken);
 
-            if (_stableUserId)
-            {
-                var userId = DbSession.Advanced.GetDocumentId(user);
-                // NOW we can update our email reservation to the server generated User Id
-                var updateReservationResult = await UpdateUserKeyReservationAsync(user.Email, userId);
-                if (!updateReservationResult.Successful)
-                {
-                    _logger.LogError("Error updating email reservation hold for {UserEmail} to {UserId}",
-                        user.Email,
-                        userId);
-                    return IdentityResult.Failed(new[]
-                    {
-                        new IdentityError
-                        {
-                            Code = "UnknownError",
-                            Description = $"The email reservation was not updated successfully."
-                        }
-                    });
-                }
-            }
-
             // Because this a a cluster-wide operation due to compare/exchange tokens,
             // we need to save changes here; if we can't store the user,
             // we need to roll back the email reservation.
             try
             {
                 await DbSession.SaveChangesAsync(cancellationToken);
+
+                // Since our commit succeeded we need to update their email reservation with the actual user id
+                if (_stableUserId)
+                {
+                    var userId = DbSession.Advanced.GetDocumentId(user);
+                    // NOW we can update our email reservation to the server generated User Id
+                    var updateReservationResult = await UpdateUserKeyReservationAsync(user.Email, userId);
+                    if (!updateReservationResult.Successful)
+                    {
+                        _logger.LogError("Error updating email reservation for {UserEmail} to {UserId}",
+                            user.Email,
+                            userId);
+                        return IdentityResult.Failed(new[]
+                        {
+                            new IdentityError
+                            {
+                                Code = "UnknownError",
+                                Description = $"The email reservation was not updated successfully."
+                            }
+                        });
+                    }
+                }
+
             }
             catch (Exception)
             {
                 // The compare/exchange email reservation is cluster-wide, outside of the session scope.
                 // We need to manually roll it back.
-
                 try
                 {
                     await this.DeleteUserKeyReservation(user.Email);
