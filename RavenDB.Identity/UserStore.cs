@@ -269,53 +269,27 @@ namespace Raven.Identity
                 return IdentityResult.Success;
             }
 
-            // Email change was more than just casing, we need to update their reservation, possibly more depending on UserId mode
-            var oldId = user.Id;
-            var newEmail = user.Email;
-
-            if (!_stableUserId)
-            {
-                // we need to update their User Id
-                user.Id = CreateEmailDerivedUserId(user.Email);
-            }
+            // Email change was more than just casing, we need to update their reservation
+            // TODO: Consider changing the user id here, otherwise a change to an email results in a user id that is not semantically correct
+            // And then what would happen if a future user tried to use the original email address?
+            // TODO: Seems like this should also be responsible for setting EmailConfirmed=false
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            // TODO: I think a failure in these compare/exchange will leave things in a bad state, consider recovery
-            // eg: if delete works but create fails, then the email reservation is 'lost'
-
-            // Since their email changed we need to delete their old email reservation
-            var compareExchangeResult = await DeleteUserKeyReservation(oldEmail);
-            if (!compareExchangeResult.Successful)
-            {
-                _logger.LogError("Error deleting old email reservation for {UserId} at {OldEmail}",
-                    user.Id,
-                    oldEmail);
-
-                return IdentityResult.Failed(new[]
-                {
-                    new IdentityError
-                    {
-                        Code = "ConcurrencyFailure",
-                        Description = "Unable to update user email."
-                    }
-                });
-            }
-
-            // Then replace it with a new reservation at the new email address
-            compareExchangeResult = await CreateUserKeyReservationAsync(newEmail, user.Id);
+            // Attempt to reserve the new email address. Leave the old reservation so that we have better failure modes
+            var compareExchangeResult = await CreateUserKeyReservationAsync(user.Email, user.Id);
             if (!compareExchangeResult.Successful)
             {
                 _logger.LogError("Error creating new email reservation for {UserId} at {NewEmail}",
                     user.Id,
-                    newEmail);
+                    user.Email);
 
                 return IdentityResult.Failed(new[]
                 {
                     new IdentityError
                     {
                         Code = "ConcurrencyFailure",
-                        Description = "Unable to update user email."
+                        Description = "Unable to reserve new user email."
                     }
                 });
             }
@@ -324,22 +298,38 @@ namespace Raven.Identity
             {
                 // We are only updating the same user record
                 await DbSession.SaveChangesAsync(cancellationToken);
+
+                // We successfully saved their user record, delete the old email reservation
+                // If this fails the only recovery we have to do is to delete the new reservation
+                compareExchangeResult = await DeleteUserKeyReservation(oldEmail);
+                if (!compareExchangeResult.Successful)
+                {
+                    _logger.LogError("Error deleting old email reservation for {UserId} at {OldEmail}",
+                        user.Id,
+                        oldEmail);
+
+                    return IdentityResult.Failed(new[]
+                    {
+                        new IdentityError
+                        {
+                            Code = "ConcurrencyFailure",
+                            Description = "Unable to update user email."
+                        }
+                    });
+                }
             }
             catch
             {
                 try
                 {
-                    // The compare/exchange email reservation is cluster-wide, outside of the session scope.
-                    // We need to manually roll it back.
+                    // The new reservation was definitely created if we got to saving the session, so delete it
                     await DeleteUserKeyReservation(user.Email);
-                    // Make sure that if we rollback the reservation, we use the OLD user Id and not the updated value
-                    await CreateUserKeyReservationAsync(oldEmail, oldId);
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e,"Error attempting to restore previous email reservation for {UserId} at {OldEmail}",
+                    _logger.LogError(e,"Error attempting to remote NEW email reservation for {UserId} at {NewEmail}",
                         user.Id,
-                        oldEmail);
+                        user.Email);
                 }
                 throw;
             }
