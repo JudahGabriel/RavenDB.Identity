@@ -987,20 +987,20 @@ namespace Raven.Identity
             return await store.Operations.SendAsync(updateEmailUserIdOperation);
         }
 
-		private Task<CompareExchangeResult<string>> DeleteUserKeyReservation(string email)
+		private async Task<CompareExchangeResult<string>> DeleteUserKeyReservation(string email)
         {
             var key = GetCompareExchangeKeyFromEmail(email);
             var store = DbSession.Advanced.DocumentStore;
 
-            var readResult = store.Operations.Send(new GetCompareExchangeValueOperation<string>(key));
+            var readResult = await store.Operations.SendAsync(new GetCompareExchangeValueOperation<string>(key));
             if (readResult == null)
             {
                 _logger.LogError("Failed to get current index for {EmailReservation} to delete it", key);
-                return Task.FromResult(new CompareExchangeResult<string>() { Successful = false });
+                return new CompareExchangeResult<string>() { Successful = false };
             }
 
             var deleteEmailOperation = new DeleteCompareExchangeValueOperation<string>(key, readResult.Index);
-            return DbSession.Advanced.DocumentStore.Operations.SendAsync(deleteEmailOperation);
+            return await DbSession.Advanced.DocumentStore.Operations.SendAsync(deleteEmailOperation);
         }
 
         private static string GetCompareExchangeKeyFromEmail(string email)
