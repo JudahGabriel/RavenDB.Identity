@@ -61,15 +61,13 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 4. In your controller actions, [call .SaveChangesAsync() when you're done making changes](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs#L35). Typically this is done via a [RavenController base class](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Controllers/RavenController.cs) for MVC/WebAPI projects or via a [page filter](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs) for Razor Pages projects.
 
 ## Changing how user IDs are generated
-By default, user IDs are email based, e.g. `"AppUser/johndoe@mail.com"`. You can change this behavior to instead use server-generated IDs:
+By default, user IDs are email based, e.g. `"AppUser/johndoe@mail.com"`. You can change this behavior to instead use server-generated IDs, e.g. `"AppUsers/0001-A"`:
 ```csharp
-// Change the user ID generation to use server-generated IDs, e.g. `"AppUser/00001-A"`
 services
     .AddRavenDbIdentityStores<AppUser>(o => o.UserIdType = UserIdType.ServerGenerated);
 ```
-Alternately, you can use username-based IDs:
+Alternately, you can use username-based IDs, e.g. "AppUsers/johndoe":
 ```csharp
-// Change the user ID generation to use server-generated IDs, e.g. `"AppUser/00001-A"`
 services
     .AddRavenDbIdentityStores<AppUser>(o => o.UserIdType = UserIdType.UserName);
 ```
