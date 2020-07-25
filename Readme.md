@@ -58,22 +58,22 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 }
 ```
 
-3.a. If you want to be able to change the email address of a user without also changing their user id, enable `StableUserId` mode:
-```csharp
-public void ConfigureServices(IServiceCollection services)
-{
-    // Everything else the same as above, just pass a configuration delegate to AddRavenDbIdentityStore(
-    services
-        .AddRavenDbDocStore() // Create an IDocumentStore singleton from the RavenSettings.
-        .AddRavenDbAsyncSession() // Create a RavenDB IAsyncDocumentSession for each request. You're responsible for calling .SaveChanges after each request.
-        .AddIdentity<AppUser, IdentityRole>() // Adds an identity system to ASP.NET Core
-        .AddRavenDbIdentityStores<AppUser>(o => o.StableUserId = true); // Use RavenDB as the store for identity users and roles, in StableUserId mode.
-    ...
-}
-```
-Be aware that changing `StableUserId` mode on an existing database is not supported, and will likely result in data loss.
-
 4. In your controller actions, [call .SaveChangesAsync() when you're done making changes](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs#L35). Typically this is done via a [RavenController base class](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Controllers/RavenController.cs) for MVC/WebAPI projects or via a [page filter](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs) for Razor Pages projects.
+
+## Changing how user IDs are generated
+By default, user IDs are email based, e.g. `"AppUser/johndoe@mail.com"`. You can change this behavior to instead use server-generated IDs:
+```csharp
+// Change the user ID generation to use server-generated IDs, e.g. `"AppUser/00001-A"`
+services
+    .AddRavenDbIdentityStores<AppUser>(o => o.UserIdType = UserIdType.ServerGenerated);
+```
+Alternately, you can use username-based IDs:
+```csharp
+// Change the user ID generation to use server-generated IDs, e.g. `"AppUser/00001-A"`
+services
+    .AddRavenDbIdentityStores<AppUser>(o => o.UserIdType = UserIdType.UserName);
+```
+Be aware if you have existing users in your database using a different ID generation scheme (e.g. AppUsers/[email]), you'll need to migrate those manually to the new ID type. Failure to do so will result in existing users being unable to log in.
 
 ## Modifying RavenDB conventions
 
@@ -106,10 +106,6 @@ Previous versions of RavenDB.Identity had relied on `IdentityUserByUserName` IDs
 ## Getting Started and Sample Project
 
 Need help? Checkout the [Razor Pages sample](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Samples/RazorPages) or [MVC sample](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Samples/Mvc) to see it all in action.
-
-## Stable User Id mode
-
-By default RavenDB.Identity will use the email address of the user as part of their unique user Id, for example `Users/user@email.com`. This is great for readability while debugging, but if your application needs to allow the user to change their email address without losing their existing data it can be a real pain. The reason is that other documents will [likely have references](https://ravendb.net/docs/article-page/4.2/Csharp/client-api/how-to/handle-document-relationships) to the User Id, so if a user changes their email address but wants to keep the same account & data you would have to write code that updated those references. To help alleviate this pain you can use RavenDB.Identity in a different configuration where it will let RavenDB generate a unique ID for each user (eg: `Users/7-A`), which means their email can change without affecting their User Id and all references to the User document stay valid when their email address changes. *Be aware, changing StableUserId mode on a database with existing User documents is not supported, and will almost certainly result in loss of data.* If you think your application might ever need to support users changing their email address, it is recommended that you start your project using Stable User Id mode.
 
 ## Not using .NET Core?
 

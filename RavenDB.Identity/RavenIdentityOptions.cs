@@ -6,12 +6,11 @@ namespace Raven.Identity
     public class RavenIdentityOptions
     {
         /// <summary>
-        /// If set to true, this will use a server generated id for the User Id. In this case, changing the user email address
-        /// has no effect on the User Id. If set to false, changing the users email address will change their User Id. Default
-        /// is false.
+        /// How IDs will be generated for users. Defaults to <see cref="UserIdType.Email"/>.
         /// </summary>
-        /// <remarks>It is critical this value is not changed once users have been stored in RavenDb. Doing so will result
-        /// in strange behavior and probably loss of data.</remarks>
-        public bool StableUserId { get; set; } = false;
+        /// <remarks>
+        /// If you change this after users are already in your database, you'll need to migrate those users to use the new ID.
+        /// </remarks>
+        public UserIdType UserIdType { get; set; } = UserIdType.Email;
     }
 }

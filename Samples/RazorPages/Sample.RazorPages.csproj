@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.0.0" />
-    <PackageReference Include="RavenDB.Client" Version="4.2.4" />
+    <PackageReference Include="RavenDB.Client" Version="5.0.0" />
   </ItemGroup>
 
 

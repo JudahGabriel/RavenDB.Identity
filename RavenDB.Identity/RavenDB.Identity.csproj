@@ -16,24 +16,24 @@
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageIcon>nuget-icon.png</PackageIcon>
     <PackageIconUrl>https://github.com/JudahGabriel/RavenDB.Identity/blob/master/RavenDB.Identity/nuget-icon.png?raw=true</PackageIconUrl>
-    <copyright>Copyright 2019 BitShuva</copyright>
+    <copyright>Copyright 2020 BitShuva</copyright>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>7.0.1</Version>
+    <Version>8.0.0</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
     <PackageLicenseFile></PackageLicenseFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes>External logins are stored as part of the user, rather than separate documents. Implementation mirrors other NoSQL identity providers.</PackageReleaseNotes>
+    <PackageReleaseNotes>Upgraded to Raven 5. Added ability to have user emails based on user name or on server-generated IDs.</PackageReleaseNotes>
     <nullable>enable</nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.0" />
-    <PackageReference Include="RavenDB.Client" Version="4.2.4" />
-    <PackageReference Include="RavenDB.DependencyInjection" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="3.1.6" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.6" />
+    <PackageReference Include="RavenDB.Client" Version="5.0.0" />
+    <PackageReference Include="RavenDB.DependencyInjection" Version="4.0.0" />
     <None Include="nuget-icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 

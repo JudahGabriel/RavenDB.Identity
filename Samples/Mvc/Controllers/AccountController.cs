@@ -130,5 +130,14 @@ namespace Sample.Mvc.Controllers
         {
             return View();
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangeEmail(string oldEmail, string newEmail)
+        {
+            var user = await userManager.FindByEmailAsync(oldEmail);
+            user.Email = newEmail;
+            var updateResult = await userManager.UpdateAsync(user);
+            return Json(updateResult);
+        }
     }
 }
