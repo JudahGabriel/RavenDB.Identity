@@ -20,12 +20,12 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>8.0.0</Version>
+    <Version>8.0.1</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
     <PackageLicenseFile></PackageLicenseFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes>Upgraded to Raven 5. Added ability to have user emails based on user name or on server-generated IDs.</PackageReleaseNotes>
+    <PackageReleaseNotes>Formalized migrations.</PackageReleaseNotes>
     <nullable>enable</nullable>
   </PropertyGroup>
 

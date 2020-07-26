@@ -71,15 +71,16 @@ Alternately, you can use username-based IDs, e.g. "AppUsers/johndoe":
 services
     .AddRavenDbIdentityStores<AppUser>(o => o.UserIdType = UserIdType.UserName);
 ```
-Be aware if you have existing users in your database using a different ID generation scheme (e.g. `"AppUsers/johndoe@mail.com"`), you'll need to migrate those manually to the new ID type. You can do that using the `ChangeUserIdType` migration:
+Be aware if you have existing users in your database using a different ID generation scheme (e.g. `"AppUsers/johndoe@mail.com"`), you'll need to migrate those to the new ID type. You can do that using the `ChangeUserIdType` migration:
 
 ```csharp
 // Important: backup your database before running this migration.
-var migration = new Raven.Identity.Migrations.ChangeUserIdType(docStore, UserIdType.ServerGenerated);
+var newIdType = UserIdType.ServerGenerated;
+var migration = new Raven.Identity.Migrations.ChangeUserIdType(docStore, newIdType);
 migration.Migrate<AppUser>(); // AppUser, or whatever you user type is.
 ```
 
-Regardless of how IDs are generated, uniqueness is based on email address; you can't have 2 users in your system with the same email address.
+Regardless of how IDs are generated, uniqueness is based on email address. You can't have 2 users in your database with the same email address.
 
 ## Modifying RavenDB conventions
 
