@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raven.Client.Documents.Operations.Backups;
+using System.Diagnostics;
 
 namespace Raven.Identity
 {
@@ -43,8 +44,6 @@ namespace Raven.Identity
         private IAsyncDocumentSession? session;
         private readonly RavenIdentityOptions options;
         private readonly ILogger logger;
-
-        private const string emailReservationKeyPrefix = "emails/";
 
         /// <summary>
         /// Creates a new user store that uses the Raven document session returned from the specified session fetcher.
@@ -154,7 +153,7 @@ namespace Raven.Identity
             // 2. Store the user in the database and save it.
             try
             {
-                await DbSession.StoreAsync(user, CreateUserId(user), cancellationToken);
+                await DbSession.StoreAsync(user, UserIdFor(user), cancellationToken);
                 await DbSession.SaveChangesAsync(cancellationToken);
 
                 // 3. Update the email reservation to point to the saved user.
@@ -305,7 +304,7 @@ namespace Raven.Identity
             // If our IDs are configured by user name, look up directly in the storage engine, skipping indexes.
             if (this.options.UserIdType == UserIdType.UserName)
             {
-                var userId = CreateUserIdFromSuffix(normalizedUserName);
+                var userId = Conventions.UserIdWithSuffix<TUser>(normalizedUserName, DbSession.Advanced.DocumentStore);
                 return FindByIdAsync(userId, cancellationToken);
             }
 
@@ -424,7 +423,7 @@ namespace Raven.Identity
             ThrowIfNullDisposedCancelled(user, cancellationToken);
 
             // See if we have an IdentityRole with that name.
-            var roleId = CreateRoleIdFromName(roleName);
+            var roleId = Conventions.RoleIdFor<TRole>(roleName, DbSession.Advanced.DocumentStore);
             var existingRoleOrNull = await this.DbSession.LoadAsync<IdentityRole>(roleId, cancellationToken);
             if (existingRoleOrNull == null)
             {
@@ -577,7 +576,8 @@ namespace Raven.Identity
         /// <inheritdoc />
         public async Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
         {
-            var getReq = new GetCompareExchangeValueOperation<string>(GetCompareExchangeKeyFromEmail(normalizedEmail));
+            var compareExchangeKey = Conventions.CompareExchangeKeyFor(normalizedEmail);
+            var getReq = new GetCompareExchangeValueOperation<string>(compareExchangeKey);
             var idResult = await DbSession.Advanced.DocumentStore.Operations.SendAsync(getReq, token: cancellationToken);
             if (idResult == null)
             {
@@ -795,54 +795,6 @@ namespace Raven.Identity
 
         #endregion
 
-        /// <summary>
-        /// Migrates the data model from a previous version of the RavenDB.Identity framework to the v6 model.
-        /// This is necessary if you stored users using an RavenDB.Identity version 5 or ealier.
-        /// </summary>
-        /// <returns></returns>
-        public static void MigrateToV6(IDocumentStore docStore)
-        {
-#pragma warning disable CS0618 // Type or member is obsolete
-            var collectionName = docStore.Conventions.FindCollectionName(typeof(IdentityUserByUserName));
-
-            // Step 1: find all the old IdentityByUserName objects.
-            var emails = new List<(string userId, string email)>(1000);
-            using (var dbSession = docStore.OpenSession())
-            {
-                var stream = dbSession.Advanced.Stream<IdentityUserByUserName>($"{collectionName}/");
-#pragma warning restore CS0618 // Type or member is obsolete
-                while (stream.MoveNext())
-                {
-                    var doc = stream.Current.Document;
-                    emails.Add((userId: doc.UserId, email: doc.UserName));
-                }
-            }
-
-            // Step 2: store each email as a cluster-wide compare/exchange value.
-            foreach (var (userId, email) in emails)
-            {
-                var compareExchangeKey = GetCompareExchangeKeyFromEmail(email);
-                var storeOperation = new PutCompareExchangeValueOperation<string>(compareExchangeKey, userId, 0);
-                var storeResult = docStore.Operations.Send(storeOperation);
-                if (!storeResult.Successful)
-                {
-                    var exception = new Exception($"Unable to migrate to RavenDB.Identity V6. An error occurred while storing the compare/exchange value. Before running this {nameof(MigrateToV6)} again, please delete all compare/exchange values in Raven that begin with {emailReservationKeyPrefix}.");
-                    exception.Data.Add("compareExchangeKey", compareExchangeKey);
-                    exception.Data.Add("compareExchangeValue", userId);
-                    throw exception;
-                }
-            }
-
-            // Step 3: remove all IdentityUserByUserName objects.
-            var operation = docStore
-                .Operations
-                .Send(new DeleteByQueryOperation(new Client.Documents.Queries.IndexQuery
-                {
-                    Query = $"from {collectionName}"
-                }));
-            operation.WaitForCompletion();
-        }
-
         private IAsyncDocumentSession DbSession
         {
             get
@@ -885,7 +837,7 @@ namespace Raven.Identity
         /// <returns></returns>
 		private Task<CompareExchangeResult<string>> CreateEmailReservationAsync(string email, string id)
 		{
-			var compareExchangeKey = GetCompareExchangeKeyFromEmail(email);
+			var compareExchangeKey = Conventions.CompareExchangeKeyFor(email);
 			var reserveEmailOperation = new PutCompareExchangeValueOperation<string>(compareExchangeKey, id, 0);
 			return DbSession.Advanced.DocumentStore.Operations.SendAsync(reserveEmailOperation);
 		}
@@ -898,7 +850,7 @@ namespace Raven.Identity
         /// <returns></returns>
         private async Task<CompareExchangeResult<string>> UpdateEmailReservationAsync(string email, string id)
         {
-            var key = GetCompareExchangeKeyFromEmail(email);
+            var key = Conventions.CompareExchangeKeyFor(email);
             var store = DbSession.Advanced.DocumentStore;
 
             var readResult = await store.Operations.SendAsync(new GetCompareExchangeValueOperation<string>(key));
@@ -916,7 +868,7 @@ namespace Raven.Identity
 
 		private async Task<CompareExchangeResult<string>> DeleteEmailReservation(string email)
         {
-            var key = GetCompareExchangeKeyFromEmail(email);
+            var key = Conventions.CompareExchangeKeyFor(email);
             var store = DbSession.Advanced.DocumentStore;
 
             var readResult = await store.Operations.SendAsync(new GetCompareExchangeValueOperation<string>(key));
@@ -930,38 +882,6 @@ namespace Raven.Identity
             return await DbSession.Advanced.DocumentStore.Operations.SendAsync(deleteEmailOperation);
         }
 
-        private static string GetCompareExchangeKeyFromEmail(string email)
-        {
-            return emailReservationKeyPrefix + email.ToLowerInvariant();
-        }
-
-		private string CreateUserId(TUser user) 
-		{
-            var userIdPart = options.UserIdType switch
-            {
-                UserIdType.Email => user.Email,
-                UserIdType.UserName => user.UserName,
-                _ => string.Empty
-            };
-            return CreateUserIdFromSuffix(userIdPart);
-		}
-
-        private string CreateUserIdFromSuffix(string suffix)
-        {
-            var conventions = DbSession.Advanced.DocumentStore.Conventions;
-            var entityName = conventions.GetCollectionName(typeof(TUser));
-            var prefix = conventions.TransformTypeCollectionNameToDocumentIdPrefix(entityName);
-            var separator = conventions.IdentityPartsSeparator;
-            return $"{prefix}{separator}{suffix.ToLowerInvariant()}";
-        }
-
-        private string CreateRoleIdFromName(string roleName)
-        {
-            var roleCollectionName = DbSession.Advanced.DocumentStore.Conventions.GetCollectionName(typeof(TRole));
-            var prefix = DbSession.Advanced.DocumentStore.Conventions.TransformTypeCollectionNameToDocumentIdPrefix(roleCollectionName);
-            var identityPartSeperator = DbSession.Advanced.DocumentStore.Conventions.IdentityPartsSeparator;
-            var roleNameLowered = roleName.ToLowerInvariant();
-            return prefix + identityPartSeperator + roleNameLowered;
-        }
+        private string UserIdFor(TUser user) => Conventions.UserIdFor(user, this.options.UserIdType, this.DbSession.Advanced.DocumentStore);
     }
 }

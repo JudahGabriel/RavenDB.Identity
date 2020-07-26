@@ -71,7 +71,15 @@ Alternately, you can use username-based IDs, e.g. "AppUsers/johndoe":
 services
     .AddRavenDbIdentityStores<AppUser>(o => o.UserIdType = UserIdType.UserName);
 ```
-Be aware if you have existing users in your database using a different ID generation scheme (e.g. AppUsers/[email]), you'll need to migrate those manually to the new ID type. Failure to do so will result in existing users being unable to log in.
+Be aware if you have existing users in your database using a different ID generation scheme (e.g. `"AppUsers/johndoe@mail.com"`), you'll need to migrate those manually to the new ID type. You can do that using the `ChangeUserIdType` migration:
+
+```csharp
+// Important: backup your database before running this migration.
+var migration = new Raven.Identity.Migrations.ChangeUserIdType(docStore, UserIdType.ServerGenerated);
+migration.Migrate<AppUser>(); // AppUser, or whatever you user type is.
+```
+
+Regardless of how IDs are generated, uniqueness is based on email address; you can't have 2 users in your system with the same email address.
 
 ## Modifying RavenDB conventions
 
@@ -87,23 +95,24 @@ services.AddRavenDbDocStore(options =>
 
 ## <a id="updating-from-old-version">Updating From Old Version of RavenDB.Identity</a>
 
-Using an old version of RavenDB.Identity and want to upgrade to the latest? You need to call the `MigrateToV6` method:
+Using RavenDB.Identity v5 or earlier and want to upgrade to the latest? You need to run the `CompareExchangeUniqueness` migration:
 
 ```csharp
-// Update our existing users to the latest RavenDB.Identity v6.
-// This is necessary only if you stored users with a previous version of RavenDB.Identity.
-// Failure to call this method will result in existing users not being able to login.
-// This method can take several minutes if you have thousands of users.
-UserStore<AppUser>.MigrateToV6(docStore);
+// Important: backup your database before running this migration.
+var migration = new Raven.Identity.Migrations.CompareExchangeUniqueness(docStore);
+migration.Migrate();
 ```
 
-This upgrade step is necessary because we [updated RavenDB.Identity to use RavenDB's cluster-safe compare/exchange](https://github.com/JudahGabriel/RavenDB.Identity/issues/5) to enforce user name/email uniqueness. 
+This upgrade step is necessary because we [updated RavenDB.Identity to use RavenDB's cluster-safe compare/exchange](https://github.com/JudahGabriel/RavenDB.Identity/issues/5) to enforce email-based uniqueness. 
 
-Previous versions of RavenDB.Identity had relied on `IdentityUserByUserName` IDs to enforce uniqueness, but this isn't guaranteed to work in a cluster. Calling MigrateToV6 will create compare/exchange values in Raven for each email address, and will remove the now-obsolete IdentityUserByUserNames collection.
+Previous versions of RavenDB.Identity had relied on `IdentityUserByUserName` IDs to enforce uniqueness, but this isn't guaranteed to work in a cluster. Doing this migration will create compare/exchange values in Raven for each user email address, and will remove the now-obsolete `IdentityUserByUserNames` collection.
 
 ## Getting Started and Sample Project
 
-Need help? Checkout the [Razor Pages sample](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Samples/RazorPages) or [MVC sample](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Samples/Mvc) to see it all in action.
+Need help? Checkout the our samples to see how to use it:
+
+- [Razor Pages](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Samples/RazorPages) 
+- [MVC](https://github.com/JudahGabriel/RavenDB.Identity/tree/master/Samples/Mvc)
 
 ## Not using .NET Core?
 
