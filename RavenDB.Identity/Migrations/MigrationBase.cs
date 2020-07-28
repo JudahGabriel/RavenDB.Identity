@@ -47,7 +47,7 @@ namespace Raven.Identity.Migrations
             using var dbSession = docStore.OpenSession();
             var collectionName = this.docStore.Conventions.FindCollectionName(typeof(T));
             var identityPartsSeparator = this.docStore.Conventions.IdentityPartsSeparator;
-            var stream = dbSession.Advanced.Stream<T>(collectionName + identityPartsSeparator);
+            using var stream = dbSession.Advanced.Stream<T>(collectionName + identityPartsSeparator);
             while (stream.MoveNext())
             {
                 yield return stream.Current;

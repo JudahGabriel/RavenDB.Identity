@@ -20,12 +20,12 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>8.0.1</Version>
+    <Version>8.0.2</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
     <PackageLicenseFile></PackageLicenseFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes>Formalized migrations.</PackageReleaseNotes>
+    <PackageReleaseNotes>Ids now default to Raven's default.</PackageReleaseNotes>
     <nullable>enable</nullable>
   </PropertyGroup>
 

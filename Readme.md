@@ -33,18 +33,13 @@ public class AppUser : Raven.Identity.IdentityUser
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
-{
-    // Grab our RavenSettings object from appsettings.json.
-    services.Configure<RavenSettings>(Configuration.GetSection("RavenSettings"));
-    
-    ...
-    
+{    
     // Add RavenDB and identity.
     services
         .AddRavenDbDocStore() // Create an IDocumentStore singleton from the RavenSettings.
         .AddRavenDbAsyncSession() // Create a RavenDB IAsyncDocumentSession for each request. You're responsible for calling .SaveChanges after each request.
         .AddIdentity<AppUser, IdentityRole>() // Adds an identity system to ASP.NET Core
-        .AddRavenDbIdentityStores<AppUser>(); // Use RavenDB as the store for identity users and roles.
+        .AddRavenDbIdentityStores<AppUser, IdentityRole>(); // Use RavenDB as the store for identity users and roles. Specify your app user type here, and your role type. If you don't have a role type, use Raven.Identity.IdentityRole.
     ...
 }
 
@@ -61,21 +56,14 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 4. In your controller actions, [call .SaveChangesAsync() when you're done making changes](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs#L35). Typically this is done via a [RavenController base class](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/Mvc/Controllers/RavenController.cs) for MVC/WebAPI projects or via a [page filter](https://github.com/JudahGabriel/RavenDB.Identity/blob/master/Samples/RazorPages/Filters/RavenSaveChangesAsyncFilter.cs) for Razor Pages projects.
 
 ## Changing how user IDs are generated
-By default, user IDs are email based, e.g. `"AppUser/johndoe@mail.com"`. You can change this behavior to instead use server-generated IDs, e.g. `"AppUsers/0001-A"`:
-```csharp
-services
-    .AddRavenDbIdentityStores<AppUser>(o => o.UserIdType = UserIdType.ServerGenerated);
-```
-Alternately, you can use username-based IDs, e.g. "AppUsers/johndoe":
-```csharp
-services
-    .AddRavenDbIdentityStores<AppUser>(o => o.UserIdType = UserIdType.UserName);
-```
-Be aware if you have existing users in your database using a different ID generation scheme (e.g. `"AppUsers/johndoe@mail.com"`), you'll need to migrate those to the new ID type. You can do that using the `ChangeUserIdType` migration:
+
+Previous versions of RavenDB.Identity used email-based user IDs, e.g. `"AppUser/johndoe@mail.com". Newer versions use Raven's default behavior, typically `"AppUsers/1-A"`. To change how Raven controls IDs for your users, see Raven's [Global Identifier Generation Conventions](https://ravendb.net/docs/article-page/4.2/csharp/client-api/configuration/identifier-generation/global).
+
+If you have old users in your database using the email-based ID convention, no problem, Raven.Identity will still work with the old users. If you want consistent IDs across all your users, you can migrate existing users to a new ID generation scheme using the `ChangeUserIdType` migration:
 
 ```csharp
 // Important: backup your database before running this migration.
-var newIdType = UserIdType.ServerGenerated;
+var newIdType = UserIdType.ServerGenerated; // Or whatever ID type you prefer.
 var migration = new Raven.Identity.Migrations.ChangeUserIdType(docStore, newIdType);
 migration.Migrate<AppUser>(); // AppUser, or whatever you user type is.
 ```
