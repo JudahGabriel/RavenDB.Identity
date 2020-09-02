@@ -20,12 +20,12 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>8.0.2</Version>
+    <Version>8.0.3</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
     <PackageLicenseFile></PackageLicenseFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes>Ids now default to Raven's default.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed bug where calling AddToRolesAsync or RemoveFromRolesAsync with an empty enumerable resulted in an exception.</PackageReleaseNotes>
     <nullable>enable</nullable>
   </PropertyGroup>
 

@@ -190,7 +190,8 @@ namespace Raven.Identity
 
             // If nothing changed we have no work to do
             var changes = DbSession.Advanced.WhatChanged();
-            if (changes?[user.Id] == null)
+            var hasUserChanged = changes.TryGetValue(user.Id, out var userChange);
+            if (!hasUserChanged)
             {
                 logger.LogWarning("UserStore UpdateAsync called without any changes to the User {UserId}", user.Id);
 
@@ -199,7 +200,7 @@ namespace Raven.Identity
             }
 
             // Check if their changed their email. If not, the rest of the code is unnecessary
-            var emailChange = changes[user.Id].FirstOrDefault(x => string.Equals(x.FieldName, nameof(user.Email)));
+            var emailChange = userChange.FirstOrDefault(x => string.Equals(x.FieldName, nameof(user.Email)));
             if (emailChange == null)
             {
                 logger.LogTrace("User {UserId} did not have modified Email, saving normally", user.Id);
@@ -208,9 +209,7 @@ namespace Raven.Identity
                 return IdentityResult.Success;
             }
 
-            // If the user changed their email, we'll have to do some special work:
-            // - Update the email compare/exchange reservation.
-            // - If the user ID is email-based, we need to recreate the user with the new email.
+            // If the user changed their email, we need to update the email compare/exchange reservation.
 
             // Get the previous value for their email
             var oldEmail = emailChange.FieldOldValue.ToString();
