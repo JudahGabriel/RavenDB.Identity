@@ -16,14 +16,14 @@ using Raven.Client.Documents;
 namespace Raven.Identity
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <typeparam name="TRole"></typeparam>
     public class RoleMan<TRole> : RoleManager<TRole>
         where TRole : class
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="store"></param>
         /// <param name="roleValidators"></param>
@@ -31,10 +31,10 @@ namespace Raven.Identity
         /// <param name="errors"></param>
         /// <param name="logger"></param>
         public RoleMan(
-            IRoleStore<TRole> store, 
-            IEnumerable<IRoleValidator<TRole>> roleValidators, 
-            ILookupNormalizer keyNormalizer, 
-            IdentityErrorDescriber errors, 
+            IRoleStore<TRole> store,
+            IEnumerable<IRoleValidator<TRole>> roleValidators,
+            ILookupNormalizer keyNormalizer,
+            IdentityErrorDescriber errors,
             ILogger<RoleManager<TRole>> logger) :
             base(store, roleValidators, keyNormalizer, errors, logger)
         {
@@ -53,9 +53,9 @@ namespace Raven.Identity
         /// </summary>
         /// <param name="context">The <see cref="IAsyncDocumentSession"/>.</param>
         /// <param name="describer">The <see cref="IdentityErrorDescriber"/>.</param>
-        public RoleStore(IAsyncDocumentSession context, IdentityErrorDescriber? describer = null) 
-            : base(context, describer) 
-        { 
+        public RoleStore(IAsyncDocumentSession context, IdentityErrorDescriber? describer = null)
+            : base(context, describer)
+        {
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace Raven.Identity
         /// <param name="role">The role to create in the store.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>A <see cref="Task{TResult}"/> that represents the <see cref="IdentityResult"/> of the asynchronous query.</returns>
-        public async virtual Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken = default)
+        public virtual async Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -154,7 +154,7 @@ namespace Raven.Identity
         /// <param name="role">The role to update in the store.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>A <see cref="Task{TResult}"/> that represents the <see cref="IdentityResult"/> of the asynchronous query.</returns>
-        public async virtual Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken = default)
+        public virtual async Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -183,7 +183,7 @@ namespace Raven.Identity
         /// <param name="role">The role to delete from the store.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>A <see cref="Task{TResult}"/> that represents the <see cref="IdentityResult"/> of the asynchronous query.</returns>
-        public async virtual Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken = default)
+        public virtual async Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -209,7 +209,7 @@ namespace Raven.Identity
         /// <param name="role">The role whose ID should be returned.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>A <see cref="Task{TResult}"/> that contains the ID of the role.</returns>
-        public Task<string?> GetRoleIdAsync(TRole role, CancellationToken cancellationToken = default)
+        public virtual Task<string?> GetRoleIdAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -227,7 +227,7 @@ namespace Raven.Identity
         /// <param name="role">The role whose name should be returned.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>A <see cref="Task{TResult}"/> that contains the name of the role.</returns>
-        public Task<string> GetRoleNameAsync(TRole role, CancellationToken cancellationToken = default)
+        public virtual Task<string> GetRoleNameAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -245,7 +245,7 @@ namespace Raven.Identity
         /// <param name="roleName">The name of the role.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
-        public Task SetRoleNameAsync(TRole role, string roleName, CancellationToken cancellationToken = default)
+        public virtual Task SetRoleNameAsync(TRole role, string roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -336,7 +336,7 @@ namespace Raven.Identity
         /// <summary>
         /// Dispose the stores
         /// </summary>
-        public void Dispose()
+        public virtual void Dispose()
         {
             _disposed = true;
         }
@@ -347,7 +347,7 @@ namespace Raven.Identity
         /// <param name="role">The role whose claims should be retrieved.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>A <see cref="Task{TResult}"/> that contains the claims granted to a role.</returns>
-        public async Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default)
+        public virtual  async Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             if (role == null)
@@ -367,7 +367,7 @@ namespace Raven.Identity
         /// <param name="claim">The claim to add to the role.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
-        public Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default)
+        public virtual Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             if (role == null)
@@ -390,7 +390,7 @@ namespace Raven.Identity
         /// <param name="claim">The claim to remove from the role.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
-        public async Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default)
+        public virtual async Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             if (role == null)
