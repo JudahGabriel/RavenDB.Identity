@@ -532,10 +532,21 @@ namespace Raven.Identity
         }
 
         /// <inheritdoc />
-        public Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+#pragma warning disable CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
+        public async Task<TUser?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+#pragma warning restore CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
         {
-            return DbSession.Query<TUser>()
-                .FirstOrDefaultAsync(e => e.Email == normalizedEmail);
+            // While we could just do an index query here: DbSession.Query<TUser>().FirstOrDefaultAsync(u => u.Email == normalizedEmail)
+            // We decided against this because indexes can be stale.
+            // Instead, we're going to go straight to the compare/exchange values and find the user for the email.
+            var key = Conventions.CompareExchangeKeyFor(normalizedEmail);
+            var readResult = await DbSession.Advanced.DocumentStore.Operations.SendAsync(new GetCompareExchangeValueOperation<string>(key));
+            if (readResult == null || string.IsNullOrEmpty(readResult.Value))
+            {
+                return null;
+            }
+
+            return await DbSession.LoadAsync<TUser>(readResult.Value);
         }
 
         /// <inheritdoc />
