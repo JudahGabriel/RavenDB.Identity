@@ -76,7 +76,8 @@ namespace Raven.Identity
     /// <typeparam name="TRole">The type of the class representing a role.</typeparam>
     /// <typeparam name="TRoleClaim">The type of the class representing a role claim.</typeparam>
     public abstract class RoleStore<TRole, TRoleClaim> :
-        IRoleClaimStore<TRole>
+        IRoleClaimStore<TRole>,
+        IQueryableRoleStore<TRole>
         where TRole : IdentityRole<TRoleClaim>
         where TRoleClaim : IdentityRoleClaim
     {
@@ -122,6 +123,15 @@ namespace Raven.Identity
                 await AsyncSession.SaveChangesAsync(cancellationToken);
             }
         }
+
+        #region IQueryableRoleStore
+
+        /// <summary>
+        /// Gets the roles as an IQueryable.
+        /// </summary>
+        public virtual IQueryable<TRole> Roles => this.AsyncSession.Query<TRole>();
+
+        #endregion
 
         /// <summary>
         /// Creates a new role in a store as an asynchronous operation.
