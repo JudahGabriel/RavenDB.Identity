@@ -70,6 +70,16 @@ namespace Raven.Identity
         public virtual string Name { get; set; } = string.Empty;
 
         /// <summary>
+        /// The concurrency stamp.
+        /// </summary>
+        public virtual string? ConcurrencyStamp { get; set; }
+
+        /// <summary>
+        /// Normalized Name
+        /// </summary>
+        public virtual string NormalizedName { get; set; }
+
+        /// <summary>
         /// Returns the name of the role.
         /// </summary>
         /// <returns>The name of the role.</returns>
