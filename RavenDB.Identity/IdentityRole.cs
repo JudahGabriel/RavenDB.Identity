@@ -38,6 +38,7 @@ namespace Raven.Identity
         /// </summary>
         public IdentityRole()
         {
+            NormalizedName = string.Empty;
         }
 
         /// <summary>
@@ -47,6 +48,7 @@ namespace Raven.Identity
         public IdentityRole(string roleName)
         {
             Name = roleName;
+            NormalizedName = string.Empty;
         }
 
         /// <summary>

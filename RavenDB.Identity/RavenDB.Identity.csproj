@@ -20,12 +20,12 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>8.0.4</Version>
+    <Version>8.0.5</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <RootNamespace>Raven.Identity</RootNamespace>
     <PackageLicenseFile></PackageLicenseFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes>FindByEmailAsync is no longer reliant on indexes.</PackageReleaseNotes>
+    <PackageReleaseNotes>IdentityRole includes concurrency stamp and normalized name. RoleStore includes IQueryable Roles.</PackageReleaseNotes>
     <nullable>enable</nullable>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -36,7 +36,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.6" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="RavenDB.Client" Version="5.0.2" />
-    <PackageReference Include="RavenDB.DependencyInjection" Version="4.0.0" />
+    <PackageReference Include="RavenDB.DependencyInjection" Version="4.0.2" />
     <None Include="nuget-icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 

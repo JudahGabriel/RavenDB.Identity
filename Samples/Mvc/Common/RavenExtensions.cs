@@ -14,10 +14,8 @@ namespace Sample.Mvc.Common
         {
             try
             {
-                using (var dbSession = store.OpenSession())
-                {
-                    dbSession.Query<AppUser>().Take(0).ToList();
-                }
+                using var dbSession = store.OpenSession();
+                dbSession.Query<AppUser>().Take(0).ToList();
             }
             catch (Raven.Client.Exceptions.Database.DatabaseDoesNotExistException)
             {
