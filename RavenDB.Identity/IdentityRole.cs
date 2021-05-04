@@ -54,12 +54,12 @@ namespace Raven.Identity
         /// <summary>
         /// Navigation property for the users in this role.
         /// </summary>
-        public virtual ICollection<string> Users { get; } = new List<string>();
+        public virtual ICollection<string> Users { get; private set; } = new List<string>();
 
         /// <summary>
         /// Navigation property for claims in this role.
         /// </summary>
-        public virtual ICollection<TRoleClaim> Claims { get; } = new List<TRoleClaim>();
+        public virtual ICollection<TRoleClaim> Claims { get; private set; } = new List<TRoleClaim>();
 
         /// <summary>
         /// Gets or sets the primary key for this role.
