@@ -12,6 +12,8 @@ namespace Raven.Identity
     /// </summary>
     public class IdentityUser
     {
+        private List<string> _roles = new List<string>();
+
         /// <summary>
         /// The ID of the user.
         /// </summary>
@@ -85,7 +87,10 @@ namespace Raven.Identity
         /// <summary>
         /// The roles of the user. To modify the user's roles, use <see cref="UserManager{TUser}.AddToRoleAsync(TUser, string)"/> and <see cref="UserManager{TUser}.RemoveFromRolesAsync(TUser, IEnumerable{string})"/>.
         /// </summary>
-        public virtual IReadOnlyList<string> Roles { get; private set; } = new List<string>();
+        public virtual IReadOnlyList<string> Roles { 
+            get => _roles; 
+            private set => _roles = value.ToList();
+        }
 
         /// <summary>
         /// The user's claims, for use in claims-based authentication.
@@ -106,15 +111,12 @@ namespace Raven.Identity
         /// The list authorization tokens from 3rd party authentication, e.g. Google, Microsoft, GitHub, etc.
         /// </summary>
         public virtual List<IdentityUserAuthToken> Tokens { get; set; } = new List<IdentityUserAuthToken>();
-        
+
         /// <summary>
         /// Gets the mutable roles list. This shouldn't be modified by user code; roles should be changed via UserManager instead.
         /// </summary>
         /// <returns></returns>
-        internal List<string> GetRolesList()
-        {
-            return (List<string>)this.Roles;
-        }
+        internal List<string> GetRolesList() => _roles;
     }
 
     /// <summary>
