@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Operations.CompareExchange;
@@ -540,7 +540,7 @@ namespace Raven.Identity
             // We decided against this because indexes can be stale.
             // Instead, we're going to go straight to the compare/exchange values and find the user for the email.
             var key = Conventions.CompareExchangeKeyFor(normalizedEmail);
-            var readResult = await DbSession.Advanced.DocumentStore.Operations.SendAsync(new GetCompareExchangeValueOperation<string>(key));
+            var readResult = await DbSession.Advanced.DocumentStore.Operations.ForDatabase(((AsyncDocumentSession)DbSession).DatabaseName).SendAsync(new GetCompareExchangeValueOperation<string>(key));
             if (readResult == null || string.IsNullOrEmpty(readResult.Value))
             {
                 return null;
@@ -803,8 +803,8 @@ namespace Raven.Identity
 		{
 			var compareExchangeKey = Conventions.CompareExchangeKeyFor(email);
 			var reserveEmailOperation = new PutCompareExchangeValueOperation<string>(compareExchangeKey, id, 0);
-			return DbSession.Advanced.DocumentStore.Operations.SendAsync(reserveEmailOperation);
-		}
+            return DbSession.Advanced.DocumentStore.Operations.ForDatabase(((AsyncDocumentSession)DbSession).DatabaseName).SendAsync(reserveEmailOperation);
+        }
 
         /// <summary>
         /// Update an existing reservation to point to a new UserId
@@ -817,7 +817,7 @@ namespace Raven.Identity
             var key = Conventions.CompareExchangeKeyFor(email);
             var store = DbSession.Advanced.DocumentStore;
 
-            var readResult = await store.Operations.SendAsync(new GetCompareExchangeValueOperation<string>(key));
+            var readResult = await store.Operations.ForDatabase(((AsyncDocumentSession)DbSession).DatabaseName).SendAsync(new GetCompareExchangeValueOperation<string>(key));
             if (readResult == null)
             {
                 logger.LogError("Failed to get current index for {EmailReservation} to update it to {ReservedFor}", key, id);
@@ -825,7 +825,7 @@ namespace Raven.Identity
             }
 
             var updateEmailUserIdOperation = new PutCompareExchangeValueOperation<string>(key, id, readResult.Index);
-            return await store.Operations.SendAsync(updateEmailUserIdOperation);
+            return await store.Operations.ForDatabase(((AsyncDocumentSession)DbSession).DatabaseName).SendAsync(updateEmailUserIdOperation);
         }
 
 		/// <summary>
@@ -838,7 +838,7 @@ namespace Raven.Identity
             var key = Conventions.CompareExchangeKeyFor(email);
             var store = DbSession.Advanced.DocumentStore;
 
-            var readResult = await store.Operations.SendAsync(new GetCompareExchangeValueOperation<string>(key));
+            var readResult = await store.Operations.ForDatabase(((AsyncDocumentSession)DbSession).DatabaseName).SendAsync(new GetCompareExchangeValueOperation<string>(key));
             if (readResult == null)
             {
                 logger.LogError("Failed to get current index for {EmailReservation} to delete it", key);
@@ -846,7 +846,7 @@ namespace Raven.Identity
             }
 
             var deleteEmailOperation = new DeleteCompareExchangeValueOperation<string>(key, readResult.Index);
-            return await DbSession.Advanced.DocumentStore.Operations.SendAsync(deleteEmailOperation);
+            return await DbSession.Advanced.DocumentStore.Operations.ForDatabase(((AsyncDocumentSession)DbSession).DatabaseName).SendAsync(deleteEmailOperation);
         }
 
         /// <summary>
