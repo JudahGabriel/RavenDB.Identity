@@ -31,14 +31,24 @@ jobs:
         url: https://api.nuget.org/v3/registration5-semver1/ravendb.identity/index.json
         method: GET
     
-    - name: Output latest NuGet version number
-      env:
-         jsonObj: ${{ fromJson(steps.fetchNugetPackage.outputs.output) }}
-         package: ${{jsonObj.items[0]}}
-         packageCount: $(jq '.items | length' package)
-         latestPackage: ${{jsonObj.items[${{packageCount}}-1]}}
-         version: ${{latestPackage.catalogEntry.version}}
-      run: |        
-         echo 'version is ${{version}}'
+    - name: Convert to JSON
+      id: convertNugetResultToJson
+      run: |
+         echo ${{ fromJson(steps.fetchNugetPackage.outputs.output) }} >> $GITHUB_OUTPUT
+     
+    - name: Parse package
+      id: parsePackage
+      run: echo ${{steps.convertNugetResultToJson.outputs.output.items[0]}} >> $GITHUB_OUTPUT
+
+    - name: Parse total version count
+      id: parseTotalVersionCount
+      run: echo ${{jq '.items | length' steps.parsePackage.outputs}} >> $GITHUB_OUTPUT
+      
+    - name: Parse latest package
+      id: latestPackage
+      run: echo ${{ steps.parsePackage.items[ ${{ steps.parseTotalVersionCount - 1 }} ] }} >> $GITHUB_OUTPUT
+
+    - name: Print latest package version
+      run: echo 'Version is ${{ steps.latestPackage.catalogEntry.version }}'
         
          
