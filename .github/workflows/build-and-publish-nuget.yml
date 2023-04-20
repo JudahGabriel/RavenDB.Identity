@@ -28,7 +28,7 @@ jobs:
       shell: pwsh
       
     - name: Output new version number
-      run: echo 'here is new version num ${{BUILD_VERSION}} - ${{steps.fetchNugetPackage.outputs.}}'
+      run: echo 'here is new version num $BUILD_VERSION - ${{steps.fetchNugetPackage.outputs}}'
         
     - name: Restore dependencies
       run: dotnet restore
