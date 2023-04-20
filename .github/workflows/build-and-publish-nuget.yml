@@ -31,6 +31,6 @@ jobs:
       shell: pwsh  
       
     - name: Output new version number
-      run: echo 'here is new version num ${{steps.fetchNugetPackage.output}}'
+      run: echo 'here is new version num ${{steps.fetchNugetPackage.outputs}}'
         
          
