@@ -26,7 +26,7 @@ namespace Raven.Identity
         /// <returns></returns>
         public virtual Claim ToClaim()
         {
-            return new Claim(ClaimType, ClaimValue);
+            return new Claim(ClaimType ?? string.Empty, ClaimValue ?? string.Empty);
         }
 
         /// <summary>

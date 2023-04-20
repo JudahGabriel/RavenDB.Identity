@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>The simple and easy RavenDB Identity provider for ASP.NET Core. Use Raven to store your users and logins with just a few lines of code.</Description>
     <Authors>Judah Gabriel Himango</Authors>
-    <TargetFrameworks>netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>RavenDB.Identity</AssemblyName>
     <Title>RavenDB Identity for ASP.NET Core</Title>

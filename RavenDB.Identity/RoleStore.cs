@@ -367,7 +367,9 @@ namespace Raven.Identity
 
             await Task.FromResult(0);
 
-            return role.Claims.Select(c => new Claim(c.ClaimType, c.ClaimValue)).ToList();
+            return role.Claims
+                .Select(c => new Claim(c.ClaimType ?? string.Empty, c.ClaimValue ?? string.Empty))
+                .ToList();
         }
 
         /// <summary>

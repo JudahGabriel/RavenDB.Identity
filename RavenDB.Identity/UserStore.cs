@@ -193,7 +193,7 @@ namespace Raven.Identity
             // If nothing changed we have no work to do
             var changes = DbSession.Advanced.WhatChanged();
             var hasUserChanged = changes.TryGetValue(user.Id, out var userChange);
-            if (!hasUserChanged)
+            if (!hasUserChanged || userChange == null)
             {
                 logger.LogWarning("UserStore UpdateAsync called without any changes to the User {UserId}", user.Id);
 
@@ -214,7 +214,7 @@ namespace Raven.Identity
             // If the user changed their email, we need to update the email compare/exchange reservation.
 
             // Get the previous value for their email
-            var oldEmail = emailChange.FieldOldValue.ToString();
+            var oldEmail = emailChange.FieldOldValue.ToString() ?? string.Empty;
             if (string.Equals(user.UserName, oldEmail, StringComparison.InvariantCultureIgnoreCase))
             {
                 logger.LogTrace("Updating username to match modified email for {UserId}", user.Id);
@@ -313,7 +313,7 @@ namespace Raven.Identity
                 // index has a bit different structure
                 var key = loginProvider + "|" + providerKey;
                 return DbSession.Query<IdentityUserIndex<TUser>.Result, IdentityUserIndex<TUser>>()
-                    .Where(u => u.LoginProviderIdentifiers.Contains(key))
+                    .Where(u => u.LoginProviderIdentifiers != null && u.LoginProviderIdentifiers.Contains(key))
                     .As<TUser>()
                     .FirstOrDefaultAsync(cancellationToken);
             }
