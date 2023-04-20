@@ -26,4 +26,4 @@ jobs:
   
     - name: Output build version
       run: |
-        echo "$Env.GITHUB_REF"
+        echo "$Env:GITHUB_REF"
