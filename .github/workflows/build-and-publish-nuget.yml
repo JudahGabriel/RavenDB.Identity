@@ -27,10 +27,13 @@ jobs:
     - name: Get latest RavenDB.Identity Nuget package version
       id: fetchNugetPackage
       run: |
-          ./GetNextNugetPackageVersion.psm1
+          Import-Module ./GetNextNugetPackageVersion.psm1
+          $version = GetNextNugetPackageVersion
+          Write-Output "Found existing Nuget package. Incrementing to version $($version)"
+          echo "BUILD_VERSION=$version"
       shell: pwsh
       
     - name: Output new version number
-      run: echo 'here is new version num ${{steps.fetchNugetPackage.outputs}}'
+      run: echo 'here is new version num ${{BUILD_VERSION}} - ${{steps.fetchNugetPackage.outputs}}'
         
          
