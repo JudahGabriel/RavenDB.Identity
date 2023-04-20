@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Identity;
 using Raven.Client.Documents;
-using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Operations.CompareExchange;
 using Raven.Client.Documents.Session;
 using System;
@@ -11,9 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Raven.Client.Documents.Operations.Backups;
-using System.Diagnostics;
-using Newtonsoft.Json.Converters;
+using Raven.Client.Documents.Linq;
 
 namespace Raven.Identity
 {
@@ -44,16 +41,19 @@ namespace Raven.Identity
         private readonly Func<IAsyncDocumentSession>? getSessionFunc;
         private IAsyncDocumentSession? session;
         private readonly ILogger logger;
+        private readonly IOptions<RavenDbIdentityOptions> options;
 
         /// <summary>
         /// Creates a new user store that uses the Raven document session returned from the specified session fetcher.
         /// </summary>
         /// <param name="getSession">The function that gets the Raven document session.</param>
         /// <param name="logger"></param>
-        public UserStore(Func<IAsyncDocumentSession> getSession, ILogger<UserStore<TUser, TRole>> logger)
+        /// <param name="options"></param>
+        public UserStore(Func<IAsyncDocumentSession> getSession, ILogger<UserStore<TUser, TRole>> logger, IOptions<RavenDbIdentityOptions> options)
         {
             this.getSessionFunc = getSession;
             this.logger = logger;
+            this.options = options;
         }
 
         /// <summary>
@@ -61,10 +61,12 @@ namespace Raven.Identity
         /// </summary>
         /// <param name="session"></param>
         /// <param name="logger"></param>
-        public UserStore(IAsyncDocumentSession session, ILogger<UserStore<TUser, TRole>> logger)
+        /// <param name="options"></param>
+        public UserStore(IAsyncDocumentSession session, ILogger<UserStore<TUser, TRole>> logger, IOptions<RavenDbIdentityOptions> options)
         {
             this.session = session;
             this.logger = logger;
+            this.options = options;
         }
 
         #region IDisposable implementation
@@ -267,7 +269,7 @@ namespace Raven.Identity
         /// <inheritdoc />
         public virtual  Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            return DbSession.Query<TUser>()
+            return UserQuery()
                 .SingleOrDefaultAsync(u => u.UserName == normalizedUserName, cancellationToken);
         }
 
@@ -306,8 +308,18 @@ namespace Raven.Identity
         /// <inheritdoc />
         public virtual Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
+            if (options.Value.UseStaticIndexes)
+            {
+                // index has a bit different structure
+                var key = loginProvider + "|" + providerKey;
+                return DbSession.Query<IdentityUserIndex<TUser>.Result, IdentityUserIndex<TUser>>()
+                    .Where(u => u.LoginProviderIdentifiers.Contains(key))
+                    .As<TUser>()
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+
             return DbSession.Query<TUser>()
-                .FirstOrDefaultAsync(u => u.Logins.Any(l => l.LoginProvider == loginProvider && l.ProviderKey == providerKey));
+                .FirstOrDefaultAsync(u => u.Logins.Any(l => l.LoginProvider == loginProvider && l.ProviderKey == providerKey), cancellationToken);
         }
 
         #endregion
@@ -365,9 +377,10 @@ namespace Raven.Identity
                 throw new ArgumentNullException(nameof(claim));
             }
 
-            var list = await DbSession.Query<TUser>()
+            var list = await UserQuery()
                 .Where(u => u.Claims.Any(c => c.ClaimType == claim.Type && c.ClaimValue == claim.Value))
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
+
             return list;
         }
 
@@ -449,10 +462,10 @@ namespace Raven.Identity
                 throw new ArgumentNullException(nameof(roleName));
             }
 
-            var users = await DbSession.Query<TUser>()
+            var users = await UserQuery()
                 .Where(u => u.Roles.Contains(roleName, StringComparer.InvariantCultureIgnoreCase))
-                .Take(1024)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
+
             return users;
         }
 
@@ -862,6 +875,17 @@ namespace Raven.Identity
                 // They just won't be able to register again with their old email. Log a warning.
                 logger.LogWarning("When user changed email from {oldEmail} to {newEmail}, there was an error removing the old email reservation. The compare exchange key {compareExchangeChange} should be removed manually by an admin.", oldEmail, newEmail, Conventions.CompareExchangeKeyFor(oldEmail));
             }
+        }
+
+        /// <summary>
+        /// Creates either a static index based query or dynamic query based on options.
+        /// </summary>
+        /// <returns></returns>
+        private IRavenQueryable<TUser> UserQuery()
+        {
+            return options.Value.UseStaticIndexes
+                ? DbSession.Query<TUser, IdentityUserIndex<TUser>>()
+                : DbSession.Query<TUser>();
         }
     }
 }
