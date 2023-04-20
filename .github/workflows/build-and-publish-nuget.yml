@@ -33,11 +33,11 @@ jobs:
     
     - name: Output latest NuGet version number
       env:
-         jsonObj=${{ fromJson(steps.fetchNugetPackage.outputs.output) }}
-         package=${{jsonObj.items[0]}}
-         packageCount=$(jq '.items | length' package)
-         latestPackage=${{jsonObj.items[${{packageCount}}-1]}}
-         version=${{latestPackage.catalogEntry.version}}
+         jsonObj: ${{ fromJson(steps.fetchNugetPackage.outputs.output) }}
+         package: ${{jsonObj.items[0]}}
+         packageCount: $(jq '.items | length' package)
+         latestPackage: ${{jsonObj.items[${{packageCount}}-1]}}
+         version: ${{latestPackage.catalogEntry.version}}
       run: |        
          echo 'version is ${{version}}'
         
