@@ -25,6 +25,7 @@ jobs:
       run: dotnet build --no-restore
   
     - name: Get latest RavenDB.Identity Nuget package version
+      id: fetchNugetPackage
       uses: satak/webrequest-action@master
       with:
         url: https://api.nuget.org/v3/registration5-semver1/ravendb.identity/index.json
@@ -32,6 +33,6 @@ jobs:
     
     - name: Output latest NuGet version number
       run:
-         $output = '${{ steps.webhook.outputs.output }}' | ConvertFrom-Json
+         $output = '${{ steps.fetchNugetPackage.outputs.output }}' | ConvertFrom-Json
          echo "Time from output $($output.time) statusCode $($output.statusCode) data $($output.data)"
          
