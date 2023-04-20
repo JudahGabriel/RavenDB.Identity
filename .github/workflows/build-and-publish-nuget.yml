@@ -27,8 +27,8 @@ jobs:
     - name: Get latest RavenDB.Identity Nuget package version
       id: fetchNugetPackage
       run: |
-          echo ./GetNextNugetPackageVersion.psm1 >> $"GITHUB_OUTPUT"
-      shell: pwsh  
+          ./GetNextNugetPackageVersion.psm1
+      shell: pwsh
       
     - name: Output new version number
       run: echo 'here is new version num ${{steps.fetchNugetPackage.outputs}}'
