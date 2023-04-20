@@ -8,7 +8,7 @@ Function GetNextNugetPackageVersion {
 	
 	# Now that we have the version string ("8.0.7" or whatever), parse that and increment the Build part of it ("7" becomes "8" in this case)
 	$versionObj = [version]::Parse($versionStr)
-	$buildNumber = $versionObj.Build	
+	$incrementedVersion = New-Object -TypeName System.Version -ArgumentList $versionObj.Major, $versionObj.Minor, ($versionObj.Build + 1)
 	
-    return $buildNumber + 1
+    return $incrementedVersion.ToString()
 }
