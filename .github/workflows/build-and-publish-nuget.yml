@@ -24,9 +24,14 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
   
-    - uses: travisj/build-number-action@v1
-      id: my-project-build-number
-    - name: Echo Build Number
-      run: echo $BUILD_NUMBER
-      env:
-        BUILD_NUMBER: ${{ steps.my-project-build-number.outputs.build-number }}
+    - name: Get latest RavenDB.Identity Nuget package version
+      uses: satak/webrequest-action@master
+      with:
+        url: https://api.nuget.org/v3/registration5-semver1/ravendb.identity/index.json
+        method: GET
+    
+    - name: Output latest NuGet version number
+      run:
+         $output = '${{ steps.webhook.outputs.output }}' | ConvertFrom-Json
+         echo "Time from output $($output.time) statusCode $($output.statusCode) data $($output.data)"
+         
