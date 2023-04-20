@@ -35,7 +35,7 @@ jobs:
       
     - name: Publish Nuget package
       run: |
-        echo "Publishing Nuget package version ${{ env.BUILD_VERSION }}
+        echo "Publishing Nuget package version ${{ env.BUILD_VERSION }}"
         nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
         
          
