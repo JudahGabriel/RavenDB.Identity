@@ -34,6 +34,6 @@ jobs:
       run: dotnet restore
       
     - name: Build
-      run: dotnet build --no-restore p:Version=$BUILD_VERSION
+      run: dotnet build --no-restore /p:Version=$BUILD_VERSION
         
          
