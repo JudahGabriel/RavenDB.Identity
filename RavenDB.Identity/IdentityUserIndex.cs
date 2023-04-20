@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Raven.Client.Documents.Indexes;
 
@@ -8,12 +9,27 @@ namespace Raven.Identity
     /// </summary>
     public class IdentityUserIndex<TUser> : AbstractIndexCreationTask<TUser, IdentityUserIndex<TUser>.Result> where TUser : IdentityUser
     {
+        /// <summary>
+        /// Result from a query to the IdentityUserIndex.
+        /// </summary>
         public class Result
         {
-            public string UserName { get; set; }
-            public string Email { get; set; }
-            public string[] LoginProviderIdentifiers { get; set; }
-            public string[] Roles { get; set; }
+            /// <summary>
+            /// The user name.
+            /// </summary>
+            public string UserName { get; set; } = string.Empty;
+            /// <summary>
+            /// The email.
+            /// </summary>
+            public string Email { get; set; } = string.Empty;
+            /// <summary>
+            /// The login provider identifiers.
+            /// </summary>
+            public List<string>? LoginProviderIdentifiers { get; set; }
+            /// <summary>
+            /// The roles assigned to the user.
+            /// </summary>
+            public List<string>? Roles { get; set; }
         }
 
         /// <summary>
@@ -26,8 +42,8 @@ namespace Raven.Identity
                 {
                     UserName = user.UserName,
                     Email = user.Email,
-                    LoginProviderIdentifiers = user.Logins.Select(x => x.LoginProvider + "|" + x.ProviderKey).ToArray(),
-                    Roles = user.Roles.ToArray()
+                    LoginProviderIdentifiers = user.Logins.Select(x => x.LoginProvider + "|" + x.ProviderKey).ToList(),
+                    Roles = user.Roles.ToList()
                 };
         }
 

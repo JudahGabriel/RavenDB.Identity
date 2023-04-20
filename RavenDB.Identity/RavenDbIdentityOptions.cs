@@ -1,5 +1,8 @@
 namespace Raven.Identity
 {
+    /// <summary>
+    /// Options for initializing RavenDB.Identity.
+    /// </summary>
     public class RavenDbIdentityOptions
     {
         /// <summary>
