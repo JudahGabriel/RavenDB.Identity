@@ -32,7 +32,12 @@ jobs:
         method: GET
     
     - name: Output latest NuGet version number
-      run:
-         $output = '${{ steps.fetchNugetPackage.outputs.output }}' | ConvertFrom-Json
-         echo "Time from output $($output.time) statusCode $($output.statusCode) data $($output.data)"
+      run: |
+         jsonObj=${{ fromJson(steps.fetchNugetPackage.outputs.output) }}
+         package=${{jsonObj.items[0]}}
+         packageCount=$(jq '.items | length' package)
+         latestPackage=${{jsonObj.items[${{packageCount}}-1]}}
+         version=${{latestPackage.catalogEntry.version}}
+         echo 'version is ${{version}}'
+        
          
