@@ -1,0 +1,54 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:    
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore
+  
+    - name: Get latest RavenDB.Identity Nuget package version
+      id: fetchNugetPackage
+      uses: satak/webrequest-action@master
+      with:
+        url: https://api.nuget.org/v3/registration5-semver1/ravendb.identity/index.json
+        method: GET
+    
+    - name: Convert to JSON
+      id: convertNugetResultToJson
+      run: |
+         echo ${{ fromJson(steps.fetchNugetPackage.outputs.output) }} >> $GITHUB_OUTPUT
+     
+    - name: Parse package
+      id: parsePackage
+      run: echo ${{steps.convertNugetResultToJson.outputs.output.items[0]}} >> $GITHUB_OUTPUT
+
+    - name: Parse total version count
+      id: parseTotalVersionCount
+      run: echo ${{jq '.items | length' steps.parsePackage.outputs}} >> $GITHUB_OUTPUT
+      
+    - name: Parse latest package
+      id: latestPackage
+      run: echo ${{ steps.parsePackage.items[ ${{ steps.parseTotalVersionCount - 1 }} ] }} >> $GITHUB_OUTPUT
+
+    - name: Print latest package version
+      run: echo 'Version is ${{ steps.latestPackage.catalogEntry.version }}'
+        
+         
