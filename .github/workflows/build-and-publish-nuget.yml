@@ -29,5 +29,8 @@ jobs:
       run: |
           echo ./GetNextNugetPackageVersion.psm1 >> $"GITHUB_OUTPUT"
       shell: pwsh  
+      
+    - name: Output new version number
+      run: echo 'here is new version num ${{steps.fetchNugetPackage.output}}'
         
          
