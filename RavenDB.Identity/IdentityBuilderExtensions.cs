@@ -36,7 +36,10 @@ namespace Raven.Identity
 			where TUser : IdentityUser
 			where TRole : IdentityRole, new()
 		{
-			builder.Services.Configure(configure);
+			if (configure != null)
+			{
+				builder.Services.Configure(configure);
+			}
 			builder.Services.AddScoped<IUserStore<TUser>, UserStore<TUser, TRole>>();
 			builder.Services.AddScoped<IRoleStore<TRole>, RoleStore<TRole>>();
 
