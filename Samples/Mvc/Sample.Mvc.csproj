@@ -1,18 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
   </PropertyGroup>
-
-
   <ItemGroup>
-    <PackageReference Include="RavenDB.Client" Version="5.0.2" />
+    <PackageReference Include="RavenDB.Client" Version="6.0.2" />
   </ItemGroup>
-
-
   <ItemGroup>
     <ProjectReference Include="..\..\RavenDB.Identity\RavenDB.Identity.csproj" />
   </ItemGroup>
-
 </Project>

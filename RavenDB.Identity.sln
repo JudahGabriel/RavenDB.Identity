@@ -1,15 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29009.5
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34408.163
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DCA79957-4BB6-40F8-83A5-DAF316943D63}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RavenDB.Identity", "RavenDB.Identity\RavenDB.Identity.csproj", "{C7824FBF-9E9B-40B5-9CF5-4884F8378BA6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{78FB3132-5BE3-4667-8C6B-14DCE2114707}"
@@ -20,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.RazorPages", "Samples\RazorPages\Sample.RazorPages.csproj", "{0C8F67DC-B6B3-4D8C-9E33-BBB47F858BE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Mvc", "Samples\Mvc\Sample.Mvc.csproj", "{8AA88A38-C74A-4F0D-9853-EFA0D78F0E63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Mvc", "Samples\Mvc\Sample.Mvc.csproj", "{8AA88A38-C74A-4F0D-9853-EFA0D78F0E63}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
