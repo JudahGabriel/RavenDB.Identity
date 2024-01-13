@@ -160,6 +160,8 @@ namespace Raven.Identity
                 // We need to manually roll it back.
                 logger.LogError("Error during user creation", createUserError);
                 DbSession.Delete(user); // It's possible user is already saved to the database. If so, delete him.
+                DbSession.SaveChangesAsync(cancellationToken);
+                
                 try
                 {
                     await this.DeleteEmailReservation(user.Email!);
