@@ -158,7 +158,7 @@ namespace Raven.Identity
             {
                 // The compare/exchange email reservation is cluster-wide, outside of the session scope.
                 // We need to manually roll it back.
-                logger.LogError("Error during user creation", createUserError);
+                logger.LogError(createUserError, "Error during user creation");
                 DbSession.Delete(user); // It's possible user is already saved to the database. If so, delete him.
                 try
                 {
