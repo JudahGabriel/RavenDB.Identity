@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Raven.Client;
 using System;
 using System.Collections.Generic;
@@ -51,9 +52,11 @@ namespace Raven.Identity
         /// Constructs a new instance of <see cref="RoleStore{TRole}"/>.
         /// </summary>
         /// <param name="context">The <see cref="IAsyncDocumentSession"/>.</param>
+    	/// <param name="options"></param>
         /// <param name="describer">The <see cref="IdentityErrorDescriber"/>.</param>
-        public RoleStore(IAsyncDocumentSession context, IdentityErrorDescriber? describer = null)
-            : base(context, describer)
+    public RoleStore(IAsyncDocumentSession context, IOptions<RavenDbIdentityOptions> options,
+                     IdentityErrorDescriber? describer = null)
+      : base(context, options, describer)
         {
         }
 
@@ -80,14 +83,17 @@ namespace Raven.Identity
         where TRole : IdentityRole<TRoleClaim>
         where TRoleClaim : IdentityRoleClaim
     {
+    	private readonly IOptions<RavenDbIdentityOptions> options;
         /// <summary>
         /// Constructs a new instance of <see cref="RoleStore{TRole, TRoleClaim}"/>.
         /// </summary>
         /// <param name="context">The <see cref="IAsyncDocumentSession"/>.</param>
         /// <param name="describer">The <see cref="IdentityErrorDescriber"/>.</param>
-        public RoleStore(IAsyncDocumentSession context, IdentityErrorDescriber? describer = null)
+    public RoleStore(IAsyncDocumentSession context, IOptions<RavenDbIdentityOptions> options,
+                     IdentityErrorDescriber? describer = null)
         {
             AsyncSession = context ?? throw new ArgumentNullException(nameof(context));
+      		this.options = options ?? throw new ArgumentNullException(nameof(options));
             ErrorDescriber = describer ?? new IdentityErrorDescriber();
         }
 
@@ -104,23 +110,18 @@ namespace Raven.Identity
         /// </summary>
         public IdentityErrorDescriber ErrorDescriber { get; set; }
 
-        /// <summary>
-        /// Gets or sets a flag indicating if changes should be persisted after CreateAsync, UpdateAsync and DeleteAsync are called.
-        /// </summary>
-        /// <value>
-        /// True if changes should be automatically persisted, otherwise false.
-        /// </value>
-        public bool AutoSaveChanges { get; set; } = true;
-
         /// <summary>Saves the current store.</summary>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
-        /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
+        /// <param name="cancellationToken">
+        ///   The <see cref="CancellationToken" /> used to propagate notifications that the operation
+        ///   should be canceled.
+        /// </param>
+        /// <returns>The <see cref="Task" /> that represents the asynchronous operation.</returns>
         private async Task SaveChanges(CancellationToken cancellationToken)
         {
-            if (AutoSaveChanges)
-            {
-                await AsyncSession.SaveChangesAsync(cancellationToken);
-            }
+          if (options.Value.AutoSaveChanges)
+          {
+            await AsyncSession.SaveChangesAsync(cancellationToken);
+          }
         }
 
         #region IQueryableRoleStore

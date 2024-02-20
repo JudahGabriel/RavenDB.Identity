@@ -81,6 +81,17 @@ namespace Raven.Identity
 
         #endregion
 
+	    #region AutoSaveChanges implementation
+
+	    private async Task SaveChangesAsync()
+	    {
+	      if (options.Value.AutoSaveChanges)
+	      {
+	        await DbSession.SaveChangesAsync();
+	      }
+	    }
+
+	    #endregion
         #region IUserStore implementation
 
         /// <inheritdoc />
@@ -208,6 +219,7 @@ namespace Raven.Identity
                 logger.LogTrace("User {UserId} did not have modified Email, saving normally", user.Id);
 
                 // Email didn't change, so no reservation to update. Just save the user data
+                await SaveChangesAsync();
                 return IdentityResult.Success;
             }
 
@@ -226,6 +238,8 @@ namespace Raven.Identity
             // See if the email change was only due to case sensitivity.
             if (string.Equals(user.Email, oldEmail, StringComparison.InvariantCultureIgnoreCase))
             {
+        		// Save the other user data.
+                await SaveChangesAsync();
                 return IdentityResult.Success;
             }
 
@@ -238,6 +252,8 @@ namespace Raven.Identity
             }
 
             await TryRemoveMigratedEmailReservation(oldEmail, user.Email);
+
+            await SaveChangesAsync();
             return IdentityResult.Success;
         }
 

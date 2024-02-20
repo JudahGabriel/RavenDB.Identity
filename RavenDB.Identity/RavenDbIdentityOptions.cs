@@ -1,3 +1,5 @@
+using Raven.Client.Documents.Session;
+
 namespace Raven.Identity
 {
     /// <summary>
@@ -12,6 +14,13 @@ namespace Raven.Identity
         /// Indexes need to be deployed to server in order for static index queries to work.
         /// </remarks>
         /// <seealso cref="IdentityUserIndex{TUser}"/>
-        public bool UseStaticIndexes { get; set; }
+    	public bool UseStaticIndexes { get; set; }
+
+        /// <summary>
+        ///   If set, changes detected in <see cref="RoleStore{TRole}" /> and <see cref="UserStore{TUser,TRole}"/>
+        ///   will be saved to Raven immediately (by calling <see cref="IAsyncDocumentSession.SaveChangesAsync"/>).
+        ///   Leave false (the default) if you've implemented the save changes call in middleware. 
+        /// </summary>
+        public bool AutoSaveChanges { get; set; }
     }
 }
