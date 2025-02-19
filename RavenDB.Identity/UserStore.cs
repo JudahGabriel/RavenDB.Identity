@@ -322,20 +322,27 @@ namespace Raven.Identity
         }
 
         /// <inheritdoc />
-        public virtual Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
+        public virtual async Task<TUser?> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
             if (options.Value.UseStaticIndexes)
             {
                 // index has a bit different structure
                 var key = loginProvider + "|" + providerKey;
-                return DbSession.Query<IdentityUserIndex<TUser>.Result, IdentityUserIndex<TUser>>()
+                return await DbSession.Query<IdentityUserIndex<TUser>.Result, IdentityUserIndex<TUser>>()
                     .Where(u => u.LoginProviderIdentifiers != null && u.LoginProviderIdentifiers.Contains(key))
                     .As<TUser>()
                     .FirstOrDefaultAsync(cancellationToken);
             }
 
-            return DbSession.Query<TUser>()
-                .FirstOrDefaultAsync(u => u.Logins.Any(l => l.LoginProvider == loginProvider && l.ProviderKey == providerKey), cancellationToken);
+            // COMMENTED OUT: as of Raven 7, calling .Any(...) with multiple fields is not supported: https://github.com/JudahGabriel/RavenDB.Identity/issues/59
+            // Instead, we'll just get all users with the provider key (typically a unique ID like a Google account ID), and then filter them in memory by login provider.
+            // This should be safe since provider key is unique across providers. 
+            //return DbSession.Query<TUser>()
+            //    .FirstOrDefaultAsync(u => u.Logins.Any(l => l.LoginProvider == loginProvider && l.ProviderKey == providerKey), cancellationToken);
+            var usersWithProviderKey = await DbSession.Query<TUser>()
+                .Where(p => p.Logins.Any(l => l.ProviderKey == providerKey))
+                .ToListAsync();
+            return usersWithProviderKey.FirstOrDefault(p => p.Logins.Any(l => l.LoginProvider == loginProvider));
         }
 
         #endregion
